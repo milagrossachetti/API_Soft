@@ -1,6 +1,7 @@
 package com.software.API.repositorio;
 
 import com.software.API.modelo.Paciente;
+import com.software.API.modelo.TipoDiagnostico;
 
 import java.util.Optional;
 

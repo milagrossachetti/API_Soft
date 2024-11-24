@@ -10,13 +10,17 @@ import java.util.List;
 @Setter
 public class Diagnostico {
     private Long id;
-    private HistoriaClinica historiaClinica;
-
     private String nombre;
     private Usuario usuario;
     private List<Evolucion> evoluciones = new ArrayList<>();
 
     public Diagnostico() {}
+
+    public Diagnostico(Long id, String nombre) {
+        this.id = id;
+        this.nombre = nombre;
+
+    }
 
     public Diagnostico(String nombre, Usuario usuario) {
         this.nombre = nombre;
@@ -24,18 +28,9 @@ public class Diagnostico {
         this.evoluciones = new ArrayList<>();
     }
 
-    public Diagnostico(String nombre, HistoriaClinica historiaClinica, Usuario usuario) {
-        this.nombre = nombre;
-        this.historiaClinica = historiaClinica;
-        this.usuario = usuario;
-        this.evoluciones = new ArrayList<>();
-    }
 
-    public Diagnostico(String nombre, HistoriaClinica historiaClinica, Evolucion primeraEvolucion, Usuario usuario) {
-        this(nombre, usuario);
-        this.historiaClinica = historiaClinica;
-        agregarEvolucion(primeraEvolucion);
-    }
+
+
 
     public void agregarEvolucion(Evolucion evolucion) {
         if (evolucion != null) {

@@ -1,14 +1,18 @@
 package com.software.API.repositorio;
 
+import com.software.API.modelo.Diagnostico;
+import com.software.API.modelo.HistoriaClinica;
 import com.software.API.modelo.Paciente;
+import com.software.API.modelo.TipoDiagnostico;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
+//CONSULTAR DIAGNOSTICO. ESTAMOS HACIENDO BIEN?????
 public class RepositorioImpl implements Repositorio{
     private List<Paciente> pacientes = new ArrayList<>();
+    private List<Diagnostico> diagnosticos = new ArrayList<>();
     public void iniciar() {
         crearPacientes();
     }
@@ -68,4 +72,6 @@ public class RepositorioImpl implements Repositorio{
     public void guardarPaciente(Paciente paciente) {
         //preguntar
     }
+
+
 }

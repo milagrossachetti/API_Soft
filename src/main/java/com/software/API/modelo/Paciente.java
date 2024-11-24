@@ -2,7 +2,9 @@ package com.software.API.modelo;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
@@ -36,6 +38,7 @@ public class Paciente {
         this.pais = pais;
         this.nroAfiliado = nroAfiliado;
         this.obraSocialId = obraSocialId;
+        this.historiaClinica = new HistoriaClinica(1L, new Date());
         this.estado = Estado.ACTIVO;
     }
 
