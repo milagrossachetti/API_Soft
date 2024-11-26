@@ -1,32 +1,55 @@
 package com.software.API.modelo;
 
-import lombok.Getter;
-import lombok.Setter;
-
+import com.software.API.excepcion.DiagnosticoNoEncontradoException;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class HistoriaClinica {
+
     private Long id;
-    private Date fechaCreacion;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate fechaCreacion;
+
     private Paciente paciente;
-    private List<Diagnostico> diagnosticos;
 
-    public HistoriaClinica(Long id, Date fechaCreacion) {
-        this.id = id;
-        this.fechaCreacion = fechaCreacion;
-        this.diagnosticos = List.of(new Diagnostico(1L, "Dengue"), new Diagnostico(2L, "Covid"), new Diagnostico(3L, "Influenza A"),
-                new Diagnostico(4L, "Gastroenteritis"), new Diagnostico(5L, "Pulmonia"));
+    private List<Diagnostico> diagnosticos = new ArrayList<>();
+
+    // Constructor con validación
+    public HistoriaClinica(Paciente paciente) {
+        if (paciente == null) {
+            throw new IllegalArgumentException("El paciente es obligatorio.");
+        }
+        this.paciente = paciente;
+        this.fechaCreacion = LocalDate.now();
     }
 
-    public HistoriaClinica(Paciente paciente){
-        this.paciente= paciente;
-        this.fechaCreacion = new Date();
+    public void agregarDiagnostico(Diagnostico diagnostico) {
+        if (diagnostico == null) {
+            throw new IllegalArgumentException("El diagnóstico no puede ser nulo.");
+        }
+        this.diagnosticos.add(diagnostico);
     }
-    protected void onCreate() {
-        this.fechaCreacion = new Date();
+
+    public List<Diagnostico> obtenerDiagnosticos() {
+        return Collections.unmodifiableList(diagnosticos);
     }
+
+    public Diagnostico obtenerDiagnosticoPorId(Long diagnosticoId) {
+        return this.diagnosticos.stream()
+                .filter(diagnostico -> diagnostico.getId().equals(diagnosticoId))
+                .findFirst()
+                .orElseThrow(() -> new DiagnosticoNoEncontradoException("Diagnóstico no encontrado con ID: " + diagnosticoId));
+    }
+
+
+
 }

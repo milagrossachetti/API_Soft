@@ -16,6 +16,7 @@ public class Usuario {
     private Long cuil;
     private String email;
     private String contrasenia;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol", nullable = false)
     private Rol rol;

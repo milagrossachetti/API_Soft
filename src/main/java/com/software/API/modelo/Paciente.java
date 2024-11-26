@@ -1,10 +1,9 @@
 package com.software.API.modelo;
 
+import com.software.API.excepcion.HistoriaClinicaNoEncontradaException;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.cglib.core.Local;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 @Getter
@@ -23,9 +22,16 @@ public class Paciente {
     private String nroAfiliado;
     private Estado estado;
     private Long obraSocialId;
-    private HistoriaClinica historiaClinica;
+    private HistoriaClinica historiaClinica; // Se gestiona manualmente, no por JPA.
 
-    public Paciente(Long cuil, Long dni, String nombreCompleto, Date fechaNacimiento, String numeroTelefono, String email, String direccion, String localidad, String provincia, String pais, String nroAfiliado, Long obraSocialId) {
+    public Paciente() {}
+
+    public Paciente(Long cuil, Long dni, String nombreCompleto, Date fechaNacimiento, String numeroTelefono,
+                    String email, String direccion, String localidad, String provincia, String pais,
+                    String nroAfiliado, Long obraSocialId) {
+        if (cuil == null || nombreCompleto == null || fechaNacimiento == null) {
+            throw new IllegalArgumentException("CUIL, nombre completo y fecha de nacimiento son obligatorios.");
+        }
         this.cuil = cuil;
         this.dni = dni;
         this.nombreCompleto = nombreCompleto;
@@ -38,28 +44,25 @@ public class Paciente {
         this.pais = pais;
         this.nroAfiliado = nroAfiliado;
         this.obraSocialId = obraSocialId;
-        this.historiaClinica = new HistoriaClinica(1L, new Date());
         this.estado = Estado.ACTIVO;
     }
 
-    public void modificarPaciente(Long dni, String nombreCompleto, Date fechaNacimiento, String numeroTelefono, String email, String direccion, String localidad, String provincia, String pais, String nroAfiliado, Long obraSocialId){
-        this.dni = dni;
-        this.nombreCompleto = nombreCompleto;
-        this.fechaNacimiento = fechaNacimiento;
-        this.numeroTelefono = numeroTelefono;
-        this.email = email;
-        this.direccion = direccion;
-        this.localidad = localidad;
-        this.provincia = provincia;
-        this.pais = pais;
-        this.nroAfiliado = nroAfiliado;
-        this.obraSocialId = obraSocialId;
+    public boolean tieneHistoriaClinica() {
+        return this.historiaClinica != null;
     }
 
-    public void bajaPaciente(){
-        this.estado = Estado.SUSPENDIDO;
+    public HistoriaClinica obtenerHistoriaClinica() {
+        if (this.historiaClinica == null) {
+            throw new HistoriaClinicaNoEncontradaException("El paciente no tiene una historia clínica asociada.");
+        }
+        return this.historiaClinica;
     }
 
-    public Paciente() {
+    public Diagnostico obtenerDiagnosticoPorId(Long diagnosticoId) {
+        if (!this.tieneHistoriaClinica()) {
+            throw new HistoriaClinicaNoEncontradaException("El paciente no tiene una historia clínica asociada.");
+        }
+        return this.historiaClinica.obtenerDiagnosticoPorId(diagnosticoId);
     }
+
 }
