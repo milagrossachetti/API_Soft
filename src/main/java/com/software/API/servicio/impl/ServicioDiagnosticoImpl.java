@@ -67,7 +67,7 @@ public class ServicioDiagnosticoImpl implements ServicioDiagnostico {
         Diagnostico nuevoDiagnostico = new Diagnostico(nombreDiagnostico, historiaClinica, medico);
 
         // Agregar el diagnóstico a la historia clínica usando el método encapsulado
-        historiaClinica.agregarDiagnostico(nuevoDiagnostico);
+        paciente.agregarDiagnostico(nuevoDiagnostico);
 
         // Guardar los cambios en el repositorio del paciente
         repositorioPaciente.guardarPaciente(paciente);

@@ -58,7 +58,14 @@ public class Paciente {
         return this.historiaClinica;
     }
 
-    public Diagnostico obtenerDiagnosticoPorId(Long diagnosticoId) {
+    public void agregarDiagnostico(Diagnostico diagnostico) {
+        if (diagnostico == null) {
+            throw new IllegalArgumentException("El diagnóstico no puede ser nulo.");
+        }
+        this.historiaClinica.agregarDiagnostico(diagnostico);
+    }
+
+    public Diagnostico obtenerDiagnosticoPorId( Long diagnosticoId) {
         if (!this.tieneHistoriaClinica()) {
             throw new HistoriaClinicaNoEncontradaException("El paciente no tiene una historia clínica asociada.");
         }

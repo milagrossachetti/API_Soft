@@ -38,7 +38,7 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
     @Override
     public List<Evolucion> obtenerEvolucionesDelDiagnostico(Long cuilPaciente, Long diagnosticoId) {
         Paciente paciente = obtenerPacientePorCuil(cuilPaciente);
-        Diagnostico diagnostico = obtenerDiagnosticoDePaciente(paciente, diagnosticoId);
+        Diagnostico diagnostico = paciente.obtenerDiagnosticoPorId(diagnosticoId);
         return diagnostico.getEvoluciones();
     }
 
@@ -50,7 +50,7 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
 
         // Obtener el paciente y su diagnóstico de manera encapsulada
         Paciente paciente = obtenerPacientePorCuil(cuilPaciente);
-        Diagnostico diagnostico = obtenerDiagnosticoDePaciente(paciente, diagnosticoId);
+        Diagnostico diagnostico = paciente.obtenerDiagnosticoPorId(diagnosticoId);
 
         // Crear y agregar la evolución al diagnóstico
         Evolucion nuevaEvolucion = diagnostico.crearYAgregarEvolucion(
@@ -95,6 +95,7 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                 .collect(Collectors.toList());
 
         Receta receta = new Receta(LocalDateTime.now(), medico, medicamentos, evolucion, null);
+        //CONSULTAR
         evolucion.agregarReceta(receta); // Encapsulamiento respetado
         logger.info("Receta creada con medicamentos: {}", nombresMedicamentos);
         return receta;
@@ -155,10 +156,6 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
     private Paciente obtenerPacientePorCuil(Long cuil) {
         return repositorioPaciente.buscarPorCuil(cuil)
                 .orElseThrow(() -> new PacienteNoEncontradoException("Paciente no encontrado con CUIL: " + cuil));
-    }
-
-    private Diagnostico obtenerDiagnosticoDePaciente(Paciente paciente, Long diagnosticoId) {
-        return paciente.obtenerDiagnosticoPorId(diagnosticoId);
     }
 
     private Evolucion obtenerEvolucionPorId(Long cuilPaciente, Long diagnosticoId, Long evolucionId) {

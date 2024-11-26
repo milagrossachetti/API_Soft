@@ -70,6 +70,8 @@ public class Diagnostico {
     }
 
 
+
+
     public Evolucion crearYAgregarEvolucion(String texto, Usuario medico, PlantillaControl plantillaControl, PlantillaLaboratorio plantillaLaboratorio) {
         if (medico == null) {
             throw new IllegalArgumentException("El médico no puede ser nulo.");
@@ -87,5 +89,6 @@ public class Diagnostico {
         this.evoluciones.add(evolucion);
         return evolucion;
     }
+
 
 }

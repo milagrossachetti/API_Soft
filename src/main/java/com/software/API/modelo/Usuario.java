@@ -35,7 +35,7 @@ public class Usuario {
 
     public Usuario(Long cuil, String email, String contrasenia, Rol rol, Long matricula, String especialidad, Long dni, String nombreCompleto, Long telefono, String direccion, String localidad, String provincia, String pais) {
         this.cuil = cuil;
-        this.email = email;
+        ;this.email = email;
         this.contrasenia = contrasenia;
         this.rol = rol;
         this.matricula = matricula;
