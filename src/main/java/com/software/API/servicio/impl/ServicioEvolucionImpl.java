@@ -44,27 +44,48 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
 
     // Crear evolución para un diagnóstico
     @Override
-    public Evolucion crearEvolucion(Long cuilPaciente, Long diagnosticoId, EvolucionDTO evolucionDTO, Usuario medico) {
-        // Validar que el médico esté autenticado
-        validarMedico(medico);
+    public Evolucion crearEvolucion(Long cuilPaciente, Long diagnosticoId, EvolucionDTO evolucionDTO, String nombreMedico, String especialidadMedico) {
+        logger.info("ID asignado al diagnóstico al ingresar al metodo crearEvolucion: {}", diagnosticoId);
 
-        // Obtener el paciente y su diagnóstico de manera encapsulada
+        if (evolucionDTO == null || evolucionDTO.getTexto() == null || evolucionDTO.getTexto().isEmpty()) {
+            throw new IllegalArgumentException("El texto de la evolución no puede ser nulo o vacío.");
+        }
+        if (nombreMedico == null || nombreMedico.isEmpty() || especialidadMedico == null || especialidadMedico.isEmpty()) {
+            throw new IllegalArgumentException("El nombre y la especialidad del médico son obligatorios.");
+        }
+
+        // Obtener el paciente de manera encapsulada
         Paciente paciente = obtenerPacientePorCuil(cuilPaciente);
+        if (paciente == null) {
+            throw new PacienteNoEncontradoException("Paciente no encontrado con CUIL: " + cuilPaciente);
+        }
+
+        // Obtener el diagnóstico asociado al paciente
         Diagnostico diagnostico = paciente.obtenerDiagnosticoPorId(diagnosticoId);
+
+        logger.info("ID asignado al diagnóstico al asignar el diagnostico despues de haberlo buscado en paciente: {}", diagnostico.getId());
+
+        if (diagnostico == null) {
+            throw new DiagnosticoNoEncontradoException("Diagnóstico no encontrado con ID: " + diagnosticoId);
+        }
 
         // Crear y agregar la evolución al diagnóstico
         Evolucion nuevaEvolucion = diagnostico.crearYAgregarEvolucion(
                 evolucionDTO.getTexto(),
-                medico,
+                nombreMedico,
+                especialidadMedico,
                 convertirPlantillaControlDTO(evolucionDTO.getPlantillaControl()),
                 convertirPlantillaLaboratorioDTO(evolucionDTO.getPlantillaLaboratorio())
         );
-
-        // Manejar recetas si están presentes en el DTO
+        logger.info("ID asignado al diagnóstico despues de agregarla la evolucion: {}", diagnostico.getId());
+        // Manejar las recetas si están presentes en el DTO
         if (evolucionDTO.getRecetas() != null && !evolucionDTO.getRecetas().isEmpty()) {
             for (RecetaDTO recetaDTO : evolucionDTO.getRecetas()) {
-                List<String> medicamentos = recetaDTO.getMedicamentos(); // Respeta el encapsulamiento
-                crearReceta(medicamentos, nuevaEvolucion, medico);
+                List<String> medicamentos = recetaDTO.getMedicamentos();
+                if (medicamentos == null || medicamentos.isEmpty()) {
+                    throw new IllegalArgumentException("Las recetas deben contener al menos un medicamento.");
+                }
+                crearReceta(medicamentos, nuevaEvolucion, nombreMedico, especialidadMedico);
             }
         }
 
@@ -72,16 +93,18 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
         repositorioPaciente.guardarPaciente(paciente);
 
         // Registrar el evento en los logs
-        logger.info("Evolución creada exitosamente para el diagnóstico ID: {}", diagnosticoId);
+        logger.info("Evolución creada exitosamente para el paciente con CUIL: {}, diagnóstico ID: {}, por el médico: {} ({})",
+                cuilPaciente, diagnosticoId, nombreMedico, especialidadMedico);
 
         // Retornar la evolución creada
         return nuevaEvolucion;
     }
 
 
+
     // Crear receta y asociarla a una evolución
     @Override
-    public Receta crearReceta(List<String> nombresMedicamentos, Evolucion evolucion, Usuario medico) {
+    public Receta crearReceta(List<String> nombresMedicamentos, Evolucion evolucion, String nombreMedico, String especialidadMedico) {
         if (nombresMedicamentos.size() > 2) {
             throw new RecetaInvalidaException("Solo se permiten hasta 2 medicamentos por receta.");
         }
@@ -94,7 +117,15 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                 .map(this::crearMedicamentoRecetado)
                 .collect(Collectors.toList());
 
-        Receta receta = new Receta(LocalDateTime.now(), medico, medicamentos, evolucion, null);
+        Receta receta = new Receta(
+                LocalDateTime.now(),
+                medicamentos,  // Lista ya validada
+                evolucion,      // Evolución asociada (validada como no nula)
+                null,           // Ruta del PDF (se asignará más tarde si es necesario)
+                nombreMedico,   // Nombre del médico
+                especialidadMedico // Especialidad del médico
+        );
+
         //CONSULTAR
         evolucion.agregarReceta(receta); // Encapsulamiento respetado
         logger.info("Receta creada con medicamentos: {}", nombresMedicamentos);
@@ -131,14 +162,27 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
     // Enviar PDF asociado a una evolución
     @Override
     public void enviarPdfEvolucion(Long cuilPaciente, Long diagnosticoId, Long evolucionId, String email) {
-        Evolucion evolucion = obtenerEvolucionPorId(cuilPaciente, diagnosticoId, evolucionId);
+        // Obtener el paciente por CUIL
+        Paciente paciente = obtenerPacientePorCuil(cuilPaciente);
+        if (paciente == null) {
+            throw new PacienteNoEncontradoException("No se encontró el paciente con CUIL: " + cuilPaciente);
+        }
 
-        if (evolucion.getRutaPdf() == null) {
+        // Obtener la evolución asociada
+        Evolucion evolucion = obtenerEvolucionPorId(cuilPaciente, diagnosticoId, evolucionId);
+        if (evolucion == null) {
+            throw new EvolucionNoEncontradaException("No se encontró la evolución con ID: " + evolucionId);
+        }
+
+        // Validar la ruta del PDF
+        if (evolucion.getRutaPdf() == null || evolucion.getRutaPdf().isEmpty()) {
             throw new RuntimeException("No hay un PDF generado para esta evolución.");
         }
 
-        String destinatario = validarCorreo(email, evolucion.getUsuario().getEmail());
+        // Validar el correo del destinatario
+        String destinatario = validarCorreo(email, paciente.getEmail());
 
+        // Intentar enviar el correo con el archivo adjunto
         try {
             servicioEmail.enviarEmailConAdjunto(
                     destinatario,
@@ -149,9 +193,10 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
             logger.info("Correo enviado a {} con el PDF de evolución ID: {}", destinatario, evolucionId);
         } catch (jakarta.mail.MessagingException e) {
             logger.error("Error al enviar el correo para la evolución {}: {}", evolucionId, e.getMessage());
-            throw new RuntimeException("No se pudo enviar el correo: " + e.getMessage(), e);
+            throw new EmailNoEnviadoException("No se pudo enviar el correo: " + e.getMessage(), e);
         }
     }
+
 
     private Paciente obtenerPacientePorCuil(Long cuil) {
         return repositorioPaciente.buscarPorCuil(cuil)
@@ -165,11 +210,6 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                 .orElseThrow(() -> new EvolucionNoEncontradaException("Evolución no encontrada."));
     }
 
-    private void validarMedico(Usuario medico) {
-        if (medico == null) {
-            throw new UsuarioNoAutenticadoException("El médico autenticado es obligatorio.");
-        }
-    }
 
     // Validar medicamentos utilizando el ServicioAPISalud
     private void validarMedicamentos(List<String> nombresMedicamentos) {

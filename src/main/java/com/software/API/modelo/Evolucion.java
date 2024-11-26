@@ -3,24 +3,23 @@ package com.software.API.modelo;
 import lombok.Getter;
 import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 public class Evolucion {
     private Long id;
-
     private LocalDateTime fechaEvolucion;
     private String texto;
 
     @JsonBackReference
     private Diagnostico diagnostico;
 
-    @JsonIgnore
-    private Usuario usuario; // Médico autenticado, obligatorio
+    private String nombreMedico; // Nombre del médico asociado a la evolución
+    private String especialidadMedico; // Especialidad del médico
 
     private PlantillaControl plantillaControl;
     private PlantillaLaboratorio plantillaLaboratorio;
@@ -30,19 +29,22 @@ public class Evolucion {
 
     public Evolucion() {}
 
-    public Evolucion(String texto, LocalDateTime fechaEvolucion, Usuario usuario) {
-        if (texto == null || fechaEvolucion == null || usuario == null) {
-            throw new IllegalArgumentException("Texto, fecha y usuario son obligatorios.");
+    public Evolucion(String texto, LocalDateTime fechaEvolucion, String nombreMedico, String especialidadMedico) {
+        if (texto == null || fechaEvolucion == null || nombreMedico == null || especialidadMedico == null) {
+            throw new IllegalArgumentException("Texto, fecha, nombre del médico y especialidad son obligatorios.");
         }
         this.texto = texto;
         this.fechaEvolucion = fechaEvolucion;
-        this.usuario = usuario;
+        this.nombreMedico = nombreMedico;
+        this.especialidadMedico = especialidadMedico;
     }
 
-    public Evolucion(String texto, LocalDateTime fechaEvolucion, Usuario usuario,
+    public Evolucion(String texto, LocalDateTime fechaEvolucion, String nombreMedico, String especialidadMedico,
                      PlantillaControl plantillaControl, PlantillaLaboratorio plantillaLaboratorio,
                      List<Receta> recetas, String rutaPdf) {
-        this(texto, fechaEvolucion, usuario);
+        this(texto, fechaEvolucion, nombreMedico, especialidadMedico);
+        this.nombreMedico = nombreMedico;
+        this.especialidadMedico = especialidadMedico;
         this.plantillaControl = plantillaControl;
         this.plantillaLaboratorio = plantillaLaboratorio;
         this.recetas = (recetas != null) ? recetas : new ArrayList<>();
@@ -55,6 +57,4 @@ public class Evolucion {
         }
         this.recetas.add(receta);
     }
-
-
 }

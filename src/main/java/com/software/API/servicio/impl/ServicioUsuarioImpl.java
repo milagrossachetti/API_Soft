@@ -89,4 +89,28 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
         return repositorioUsuario.findByCuil(cuil).orElse(null);
     }
 
+    @Override
+    public String obtenerNombreCompletoMedicoAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No hay un médico autenticado en el contexto actual.");
+        }
+        String email = authentication.getName();
+        Usuario medico = repositorioUsuario.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en la base de datos."));
+        return medico.getNombreCompleto(); // Solo devolvemos el nombre completo
+    }
+
+    @Override
+    public String obtenerEspecialidadMedicoAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No hay un médico autenticado en el contexto actual.");
+        }
+        String email = authentication.getName();
+        Usuario medico = repositorioUsuario.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en la base de datos."));
+        return medico.getEspecialidad(); // Solo devolvemos la especialidad
+    }
+
 }

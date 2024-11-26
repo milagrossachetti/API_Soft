@@ -36,11 +36,11 @@ public class GeneradorPDF {
         document.add(new Paragraph("DNI: " + paciente.getDni()));
         document.add(new Paragraph("CUIL: " + paciente.getCuil()));
 
-        Usuario medico = evolucion.getUsuario();
+        String medico = evolucion.getNombreMedico();
         if (medico != null) {
             document.add(new Paragraph("Datos del Médico:"));
-            document.add(new Paragraph("Nombre: " + medico.getNombreCompleto()));
-            document.add(new Paragraph("Especialidad: " + medico.getEspecialidad()));
+            document.add(new Paragraph("Nombre: " + evolucion.getNombreMedico()));
+            document.add(new Paragraph("Especialidad: " + evolucion.getEspecialidadMedico()));
         }
 
         String fechaFormateada = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
@@ -87,11 +87,11 @@ public class GeneradorPDF {
         document.add(new Paragraph("DNI: " + paciente.getDni()));
         document.add(new Paragraph("CUIL: " + paciente.getCuil()));
 
-        Usuario medico = receta.getMedico();
+        String medico = receta.getNombreMedico();
         if (medico != null) {
             document.add(new Paragraph("Datos del Médico:"));
-            document.add(new Paragraph("Nombre: " + medico.getNombreCompleto()));
-            document.add(new Paragraph("Especialidad: " + medico.getEspecialidad()));
+            document.add(new Paragraph("Nombre: " + receta.getNombreMedico()));
+            document.add(new Paragraph("Especialidad: " + receta.getEspecialidadMedico()));
         }
 
         String fechaFormateada = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));

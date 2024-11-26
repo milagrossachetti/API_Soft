@@ -6,10 +6,11 @@ import com.software.API.excepcion.DiagnosticoNoEncontradoException;
 import com.software.API.excepcion.PacienteNoEncontradoException;
 import com.software.API.modelo.Diagnostico;
 import com.software.API.modelo.Evolucion;
-import com.software.API.modelo.Usuario;
+import com.software.API.servicio.ServicioUsuario;
 import com.software.API.repositorio.RepositorioUsuario;
 import com.software.API.servicio.ServicioDiagnostico;
 import com.software.API.servicio.ServicioEvolucion;
+
 
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -33,44 +34,42 @@ public class ControladorEvolucion {
 
     private final ServicioEvolucion servicioEvolucion;
     private final ServicioDiagnostico servicioDiagnostico;
-    private final RepositorioUsuario repositorioUsuario;
+
+    private final ServicioUsuario servicioUsuario;
 
     public ControladorEvolucion(
             ServicioEvolucion servicioEvolucion,
             ServicioDiagnostico servicioDiagnostico,
-            RepositorioUsuario repositorioUsuario) {
+            ServicioUsuario servicioUsuario) {
         this.servicioEvolucion = servicioEvolucion;
         this.servicioDiagnostico = servicioDiagnostico;
-        this.repositorioUsuario = repositorioUsuario;
+        this.servicioUsuario = servicioUsuario;
     }
 
-    //VERIFICAR AUTENTICACION PARA ESTE METODO NECESARIO PARA CREAR DIAGNOSTICO Y EVOLUCIONES
-    private Usuario obtenerMedicoAutenticado() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("No hay un médico autenticado en el contexto actual.");
-        }
-        String email = authentication.getName();
-        return repositorioUsuario.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado en la base de datos."));
-    }
 
-    //CREAR DIAGNOSTICO
-    @PostMapping("/diagnosticos/crear-diagnostico")
-    public ResponseEntity<Object> crearDiagnostico(@RequestBody @Valid DiagnosticoDTO diagnosticoDTO) {
-        try {
-            Usuario medico = obtenerMedicoAutenticado();
-            Diagnostico diagnostico = servicioDiagnostico.crearDiagnostico(
-                    diagnosticoDTO.getIdHistoriaClinica(),
-                    diagnosticoDTO.getNombreDiagnostico(),
-                    diagnosticoDTO.getEvolucionDTO(),
-                    medico
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(diagnostico);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        //CREAR DIAGNOSTICO
+        @PostMapping("/diagnosticos/crear-diagnostico")
+        public ResponseEntity<Object> crearDiagnostico(@RequestBody @Valid DiagnosticoDTO diagnosticoDTO) {
+            try {
+    
+                // Extraer solo los valores necesarios
+                String nombreMedico = servicioUsuario.obtenerNombreCompletoMedicoAutenticado();
+                String especialidadMedico = servicioUsuario.obtenerEspecialidadMedicoAutenticado();
+    
+                // Pasar los valores al servicio
+                Diagnostico diagnostico = servicioDiagnostico.crearDiagnostico(
+                        diagnosticoDTO.getPacienteDTO().getCuil(),
+                        diagnosticoDTO.getNombreDiagnostico(),
+                        diagnosticoDTO.getEvolucionDTO(),
+                        nombreMedico,
+                        especialidadMedico
+                );
+                return ResponseEntity.status(HttpStatus.CREATED).body(diagnostico);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
         }
-    }
+
 
 
     //CREAR EVOLUCION
@@ -85,11 +84,12 @@ public class ControladorEvolucion {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El texto de la evolución no puede estar vacío.");
             }
 
-            // Obtener el médico autenticado
-            Usuario medico = obtenerMedicoAutenticado();
+            // Extraer solo los valores necesarios
+            String nombreMedico = servicioUsuario.obtenerNombreCompletoMedicoAutenticado();
+            String especialidadMedico = servicioUsuario.obtenerEspecialidadMedicoAutenticado();
 
             // Crear la evolución delegando al servicio
-            Evolucion evolucion = servicioEvolucion.crearEvolucion(cuilPaciente, diagnosticoId, evolucionDTO, medico);
+            Evolucion evolucion = servicioEvolucion.crearEvolucion(cuilPaciente, diagnosticoId, evolucionDTO, nombreMedico, especialidadMedico);
 
             // Responder con el estado 201 (CREATED) y la evolución creada
             return ResponseEntity.status(HttpStatus.CREATED).body(evolucion);

@@ -12,7 +12,8 @@ import java.util.List;
 public class Receta {
     private Long id; // Opcional para lógica en memoria, no para persistencia
     private LocalDateTime fecha;
-    private Usuario medico; // Referencia directa al médico
+    private String nombreMedico;
+    private String especialidadMedico;// Referencia directa al médico
     private List<MedicamentoRecetado> medicamentos = new ArrayList<>(); // Lista gestionada manualmente
     private boolean anulada;
     private Evolucion evolucion; // Referencia directa a la evolución
@@ -20,13 +21,14 @@ public class Receta {
 
     public Receta() {}
 
-    public Receta(LocalDateTime fecha, Usuario medico, List<MedicamentoRecetado> medicamentos, Evolucion evolucion, String rutaPdf) {
+    public Receta(LocalDateTime fecha, List<MedicamentoRecetado> medicamentos, Evolucion evolucion, String rutaPdf, String nombreMedico, String especialidadMedico) {
         this.fecha = fecha;
-        this.medico = medico;
         this.medicamentos = medicamentos != null ? medicamentos : new ArrayList<>();
         this.evolucion = evolucion;
         this.anulada = false;
         this.rutaPdf = rutaPdf;
+        this.nombreMedico = nombreMedico;
+        this.especialidadMedico = especialidadMedico;
     }
 
     public void anular() {

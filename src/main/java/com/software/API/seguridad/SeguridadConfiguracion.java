@@ -25,7 +25,7 @@ public class SeguridadConfiguracion {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/usuario/registro", "/usuario/login", "/error").permitAll()
-                        .requestMatchers("/paciente/**", "/historia-clinica/**", "/usuario/**").hasAuthority("MEDICO")
+                        .requestMatchers("/paciente/**", "/historia-clinica/**", "/usuario/**", "/api/diagnosticos/**").hasAuthority("MEDICO")
                         .requestMatchers("/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 );

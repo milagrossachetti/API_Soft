@@ -18,52 +18,17 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
     }
 
     private void inicializarDatos() {
-        // Crear roles
-        Rol rolMedico = new Rol(1L,"MEDICO");
-
-
-        // Crear usuarios directamente
-        Usuario medico1 = new Usuario(
-                20123456789L, // CUIL
-                "juan.perez@hospital.com", // Email
-                "password123", // Contraseña
-                rolMedico, // Rol
-                12345L, // Matrícula
-                "Cardiología", // Especialidad
-                12345678L, // DNI
-                "Dr. Juan Pérez", // Nombre completo
-                1145678901L, // Teléfono
-                "Av. Siempre Viva 123", // Dirección
-                "CABA", // Localidad
-                "Buenos Aires", // Provincia
-                "Argentina" // País
-        );
-
-        Usuario medico2 = new Usuario(
-                20456789012L, // CUIL
-                "pedro.martinez@hospital.com", // Email
-                "password789", // Contraseña
-                rolMedico, // Rol
-                67890L, // Matrícula
-                "Pediatría", // Especialidad
-                11223344L, // DNI
-                "Dr. Pedro Martínez", // Nombre completo
-                1143210987L, // Teléfono
-                "San Martín 789", // Dirección
-                "Rosario", // Localidad
-                "Santa Fe", // Provincia
-                "Argentina" // País
-        );
-
         // Crear Historia Clínica y Diagnósticos
         HistoriaClinica historia1 = new HistoriaClinica();
         historia1.setId(1L);
 
-        Diagnostico diagnostico1 = new Diagnostico("Fiebre tifoidea", medico1);
+        // Crear Diagnóstico y Evoluciones
+        Diagnostico diagnostico1 = new Diagnostico("Fiebre tifoidea", historia1, "Dr. Juan Pérez", "Cardiología");
         Evolucion evolucion1 = new Evolucion(
                 "Paciente presenta fiebre persistente.",
                 LocalDateTime.now(),
-                medico1, // Mismo médico del diagnóstico
+                "Dr. Juan Pérez", // Nombre del médico
+                "Cardiología", // Especialidad
                 new PlantillaControl(65.5, 1.70, "120/80", 80, 98, null),
                 null,
                 new ArrayList<>(),
@@ -74,18 +39,20 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
         Evolucion evolucion2 = new Evolucion(
                 "Fiebre disminuye, pero continúa malestar general.",
                 LocalDateTime.now(),
-                medico2, // Otro médico
+                "Dr. Pedro Martínez", // Otro médico
+                "Pediatría", // Especialidad
                 null,
                 null,
                 Arrays.asList(new Receta(
                         LocalDateTime.now(),
-                        medico2,
                         Arrays.asList(
                                 new MedicamentoRecetado("Paracetamol"),
                                 new MedicamentoRecetado("Ibuprofeno")
                         ),
                         evolucion1,
-                        null
+                        "Dr. Pedro Martínez",
+                        "Pediatría",
+                        "Fiebre tifoidea"
                 )),
                 null
         );
@@ -93,11 +60,12 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
 
         historia1.getDiagnosticos().add(diagnostico1);
 
-        Diagnostico diagnostico2 = new Diagnostico("Sinusitis frontal aguda", medico2);
+        Diagnostico diagnostico2 = new Diagnostico("Sinusitis frontal aguda", historia1, "Dr. Pedro Martínez", "Pediatría");
         Evolucion evolucion3 = new Evolucion(
                 "Paciente con congestión severa y dolor frontal.",
                 LocalDateTime.now(),
-                medico2, // Mismo médico del diagnóstico
+                "Dr. Pedro Martínez", // Mismo médico del diagnóstico
+                "Pediatría", // Especialidad
                 new PlantillaControl(68.0, 1.75, "130/85", 85, 96, null),
                 null,
                 new ArrayList<>(),
@@ -105,20 +73,21 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
         );
         Receta receta = new Receta(
                 LocalDateTime.now(),
-                medico2,
                 Arrays.asList(
                         new MedicamentoRecetado("Amoxicilina"),
                         new MedicamentoRecetado("Aspirina")
                 ),
                 evolucion3,
-                null
+                "Dr. Pedro Martínez",
+                "Pediatría",
+                "Sinusitis frontal aguda"
         );
         evolucion3.getRecetas().add(receta);
         diagnostico2.agregarEvolucion(evolucion3);
 
         historia1.getDiagnosticos().add(diagnostico2);
 
-        // Crear paciente con la historia clínica
+        // Crear Paciente con la Historia Clínica
         Paciente paciente1 = new Paciente(
                 20304050607L,
                 12345678L,
@@ -147,12 +116,26 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
     @Override
     public void guardarPaciente(Paciente paciente) {
         buscarPorCuil(paciente.getCuil())
-                .ifPresentOrElse(
-                        existente -> {
-                            int index = pacientes.indexOf(existente);
-                            pacientes.set(index, paciente);
-                        },
-                        () -> pacientes.add(paciente)
-                );
+                .ifPresent(existente -> {
+                    HistoriaClinica nuevaHistoriaClinica = paciente.getHistoriaClinica();
+                    if (nuevaHistoriaClinica != null) {
+                        // Obtener diagnósticos actuales
+                        List<Diagnostico> diagnosticosExistentes = existente.getHistoriaClinica().getDiagnosticos();
+
+                        // Fusionar diagnósticos nuevos
+                        nuevaHistoriaClinica.getDiagnosticos().forEach(diagnosticoNuevo -> {
+                            boolean yaExiste = diagnosticosExistentes.stream()
+                                    .anyMatch(d -> d.getId().equals(diagnosticoNuevo.getId()));
+                            if (!yaExiste) {
+                                diagnosticosExistentes.add(diagnosticoNuevo);
+                            }
+                        });
+
+                        // Actualizar la historia clínica con los diagnósticos fusionados
+                        existente.getHistoriaClinica().setDiagnosticos(diagnosticosExistentes);
+                    }
+                });
     }
+
+
 }

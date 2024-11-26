@@ -24,20 +24,22 @@ public interface ServicioEvolucion {
      * @param cuilPaciente CUIL del paciente.
      * @param diagnosticoId ID del diagnóstico.
      * @param evolucionDTO Datos de la evolución a crear.
-     * @param medico Médico que crea la evolución.
+     * @param nombreMedico Médico que crea la evolución.
+     * @param especialidadMedico
      * @return La evolución creada.
      */
-    Evolucion crearEvolucion(Long cuilPaciente, Long diagnosticoId, EvolucionDTO evolucionDTO, Usuario medico);
+    Evolucion crearEvolucion(Long cuilPaciente, Long diagnosticoId, EvolucionDTO evolucionDTO, String nombreMedico , String especialidadMedico);
 
     /**
      * Crea una receta asociada a una evolución específica.
      *
      * @param nombresMedicamentos Lista de nombres de medicamentos a incluir en la receta.
      * @param evolucion Evolución a la que se asocia la receta.
-     * @param medico Médico que crea la receta.
+     * @param nombreMedico Médico que crea la receta.
+     * @param especialidadMedico
      * @return La receta creada.
      */
-    Receta crearReceta(List<String> nombresMedicamentos, Evolucion evolucion, Usuario medico);
+    Receta crearReceta(List<String> nombresMedicamentos, Evolucion evolucion, String nombreMedico, String especialidadMedico) ;
 
     /**
      * Genera un archivo PDF para una receta específica.

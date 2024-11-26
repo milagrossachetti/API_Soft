@@ -1,16 +1,24 @@
 package com.software.API.DTOs;
 
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+
 public class PacienteDTO {
+    @NotNull(message = "El CUIL del paciente es obligatorio.")
     private Long cuil;
-    private String nombre;
-    private String apellido;
-    private List<DiagnosticoDTO> diagnosticos; // Diagnósticos como parte del paciente
+
+    public PacienteDTO(@NotNull(message = "El CUIL del paciente es obligatorio.") Long cuil) {
+        this.cuil = cuil;
+    }
+
+
 }

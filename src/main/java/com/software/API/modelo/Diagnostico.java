@@ -14,7 +14,8 @@ public class Diagnostico {
     private Long id;
     private HistoriaClinica historiaClinica;
     private String nombreDiagnostico;
-    private Usuario medico; // Médico que creó el diagnóstico
+    private String nombreMedico; // Nombre del médico que creó el diagnóstico
+    private String especialidadMedico; // Especialidad del médico
     private List<Evolucion> evoluciones = new ArrayList<>();
 
     // Constructor por defecto
@@ -28,36 +29,32 @@ public class Diagnostico {
         this.nombreDiagnostico = nombreDiagnostico;
     }
 
-    // Constructor con nombre del diagnóstico y médico
-    public Diagnostico(String nombreDiagnostico, Usuario medico) {
-        if (nombreDiagnostico == null || medico == null) {
-            throw new IllegalArgumentException("El nombre del diagnóstico y el médico no pueden ser nulos.");
+    // Constructor con nombre del diagnóstico, médico y especialidad
+    public Diagnostico(String nombreDiagnostico, String nombreMedico, String especialidadMedico) {
+        if (nombreDiagnostico == null || nombreMedico == null || especialidadMedico == null) {
+            throw new IllegalArgumentException("El nombre del diagnóstico, el nombre del médico y la especialidad no pueden ser nulos.");
         }
         this.nombreDiagnostico = nombreDiagnostico;
-        this.medico = medico;
+        this.nombreMedico = nombreMedico;
+        this.especialidadMedico = especialidadMedico;
     }
 
     // Constructor con historia clínica
-    public Diagnostico(String nombreDiagnostico, HistoriaClinica historiaClinica, Usuario medico) {
-        this(nombreDiagnostico, medico);
+    public Diagnostico(String nombreDiagnostico, HistoriaClinica historiaClinica, String nombreMedico, String especialidadMedico) {
+        this(nombreDiagnostico, nombreMedico, especialidadMedico);
         if (historiaClinica == null) {
             throw new IllegalArgumentException("La historia clínica no puede ser nula.");
         }
         this.historiaClinica = historiaClinica;
     }
 
-    // Constructor con nombre, historia clínica, evolución inicial y usuario
-    public Diagnostico(String nombreDiagnostico, HistoriaClinica historiaClinica, Evolucion primeraEvolucion, Usuario medico) {
-        this(nombreDiagnostico, historiaClinica, medico);
+    // Constructor con nombre, historia clínica y evolución inicial
+    public Diagnostico(String nombreDiagnostico, HistoriaClinica historiaClinica, Evolucion primeraEvolucion, String nombreMedico, String especialidadMedico) {
+        this(nombreDiagnostico, historiaClinica, nombreMedico, especialidadMedico);
         agregarEvolucion(primeraEvolucion);
     }
 
-
-    public String getNombreDiagnostico() {
-        return this.nombreDiagnostico;
-    }
-
-    // Agregar evolución al diagnóstico
+    // Método para agregar una evolución al diagnóstico
     public void agregarEvolucion(Evolucion evolucion) {
         if (evolucion == null) {
             throw new IllegalArgumentException("La evolución no puede ser nula.");
@@ -65,30 +62,41 @@ public class Diagnostico {
         this.evoluciones.add(evolucion);
     }
 
+    // Obtener la lista de evoluciones como una lista inmutable
     public List<Evolucion> obtenerEvoluciones() {
         return Collections.unmodifiableList(evoluciones);
     }
 
-
-
-
-    public Evolucion crearYAgregarEvolucion(String texto, Usuario medico, PlantillaControl plantillaControl, PlantillaLaboratorio plantillaLaboratorio) {
-        if (medico == null) {
-            throw new IllegalArgumentException("El médico no puede ser nulo.");
+    // Método para crear y agregar una evolución
+    public Evolucion crearYAgregarEvolucion(String texto, String nombreMedico, String especialidadMedico,
+                                            PlantillaControl plantillaControl, PlantillaLaboratorio plantillaLaboratorio) {
+        // Validar parámetros
+        if (texto == null || texto.isEmpty()) {
+            throw new IllegalArgumentException("El texto no puede ser nulo o vacío.");
+        }
+        if (nombreMedico == null || nombreMedico.isEmpty()) {
+            throw new IllegalArgumentException("El nombre del médico no puede ser nulo o vacío.");
+        }
+        if (especialidadMedico == null || especialidadMedico.isEmpty()) {
+            throw new IllegalArgumentException("La especialidad del médico no puede ser nula o vacía.");
         }
 
+        // Crear una nueva evolución
         Evolucion evolucion = new Evolucion(
                 texto,
                 LocalDateTime.now(),
-                medico,
+                nombreMedico,
+                especialidadMedico,
                 plantillaControl,
                 plantillaLaboratorio,
                 new ArrayList<>(),
                 ""
         );
+
+        // Agregar la evolución a la lista del diagnóstico
         this.evoluciones.add(evolucion);
+
+        // Retornar la evolución creada
         return evolucion;
     }
-
-
 }

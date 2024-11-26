@@ -10,4 +10,6 @@ public interface ServicioUsuario {
     Usuario crearUsuario(UsuarioDTO usuario) throws Exception;
     void eliminarUsuario(Long cuil) throws Exception;
     Usuario buscarUsuario(Long cuil);
+    String obtenerNombreCompletoMedicoAutenticado();
+    String obtenerEspecialidadMedicoAutenticado();
 }

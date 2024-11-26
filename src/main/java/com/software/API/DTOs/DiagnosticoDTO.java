@@ -10,6 +10,9 @@ import javax.validation.constraints.NotNull;
 @Setter
 public class DiagnosticoDTO {
     @NotNull
+    private PacienteDTO pacienteDTO; // CUIL del paciente, necesario para la búsqueda
+
+    @NotNull
     private Long idHistoriaClinica;
 
     @NotNull
@@ -20,9 +23,10 @@ public class DiagnosticoDTO {
 
     public DiagnosticoDTO() {}
 
-    public DiagnosticoDTO(Long idHistoriaClinica, String nombreDiagnostico, EvolucionDTO evolucionDTO) {
+    public DiagnosticoDTO(Long idHistoriaClinica, String nombreDiagnostico, EvolucionDTO evolucionDTO, PacienteDTO pacienteDTO) {
         this.idHistoriaClinica = idHistoriaClinica;
         this.nombreDiagnostico = nombreDiagnostico;
         this.evolucionDTO = evolucionDTO;
+        this.pacienteDTO = pacienteDTO;
     }
 }

@@ -45,11 +45,7 @@ public class ServicioDiagnosticoImpl implements ServicioDiagnostico {
 
 
     @Override
-    public Diagnostico crearDiagnostico(Long cuilPaciente, String nombreDiagnostico, EvolucionDTO evolucionDTO, Usuario medico) {
-        // Validar que el médico esté autenticado
-        if (medico == null) {
-            throw new UsuarioNoAutenticadoException("El usuario médico es obligatorio.");
-        }
+    public Diagnostico crearDiagnostico(Long cuilPaciente, String nombreDiagnostico, EvolucionDTO evolucionDTO, String nombreMedico, String especialidadMedico) {
 
         // Buscar el paciente por su CUIL
         Paciente paciente = repositorioPaciente.buscarPorCuil(cuilPaciente)
@@ -64,22 +60,30 @@ public class ServicioDiagnosticoImpl implements ServicioDiagnostico {
         HistoriaClinica historiaClinica = paciente.obtenerHistoriaClinica();
 
         // Crear el diagnóstico
-        Diagnostico nuevoDiagnostico = new Diagnostico(nombreDiagnostico, historiaClinica, medico);
+        Diagnostico nuevoDiagnostico = new Diagnostico(nombreDiagnostico, historiaClinica, nombreMedico, especialidadMedico);
+        logger.info("ID asignado al diagnóstico antes de asignarle con currentTime: {}", nuevoDiagnostico.getId());
+        // Asignar un ID único manualmente
+        nuevoDiagnostico.setId(System.currentTimeMillis()); // O una lógica personalizada para generar IDs
+
+        logger.info("ID asignado al diagnóstico despues de asignarle con currentTime: {}", nuevoDiagnostico.getId());
 
         // Agregar el diagnóstico a la historia clínica usando el método encapsulado
         paciente.agregarDiagnostico(nuevoDiagnostico);
 
+        logger.info("ID asignado al diagnóstico despues de agregar el diagnostico a paciente: {}", nuevoDiagnostico.getId());
         // Guardar los cambios en el repositorio del paciente
         repositorioPaciente.guardarPaciente(paciente);
 
+        logger.info("ID asignado al diagnóstico despues de guardar en repositorio paciente y antes de enviar el valor a crearEvolucion: {}", nuevoDiagnostico.getId());
         // Crear la evolución inicial asociada al diagnóstico
         servicioEvolucion.crearEvolucion(
                 cuilPaciente,
                 nuevoDiagnostico.getId(),
                 evolucionDTO,
-                medico
+                nombreMedico,
+                especialidadMedico
         );
-
+        logger.info("ID asignado al diagnóstico al regresar de crear evolucion: {}", nuevoDiagnostico.getId());
         // Registrar la creación en los logs
         logger.info("Diagnóstico '{}' creado para el paciente con CUIL: {}", nombreDiagnostico, cuilPaciente);
 
