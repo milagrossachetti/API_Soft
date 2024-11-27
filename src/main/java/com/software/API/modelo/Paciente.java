@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -71,5 +72,23 @@ public class Paciente {
         }
         return this.historiaClinica.obtenerDiagnosticoPorId(diagnosticoId);
     }
+
+
+    public Evolucion crearYAgregarEvolucion(Long diagnosticoId, String texto, String nombreMedico, String especialidadMedico,
+                                            PlantillaControl plantillaControl, PlantillaLaboratorio plantillaLaboratorio) {
+        if (historiaClinica == null) {
+            throw new IllegalStateException("El paciente no tiene una historia clínica asociada.");
+        }
+        return historiaClinica.crearYAgregarEvolucion(diagnosticoId, texto, nombreMedico, especialidadMedico, plantillaControl, plantillaLaboratorio);
+    }
+
+    public Receta crearReceta(List<String> medicamentos, Long diagnosticoId, Long evolucionId, String nombreMedico, String especialidadMedico) {
+        if (this.historiaClinica == null) {
+            throw new IllegalArgumentException("El paciente no tiene una historia clínica asociada.");
+        }
+        return this.historiaClinica.crearReceta(medicamentos, diagnosticoId, evolucionId, nombreMedico, especialidadMedico);
+    }
+
+
 
 }

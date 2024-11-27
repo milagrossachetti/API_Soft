@@ -16,19 +16,17 @@ public class Receta {
     private String especialidadMedico;// Referencia directa al médico
     private List<MedicamentoRecetado> medicamentos = new ArrayList<>(); // Lista gestionada manualmente
     private boolean anulada;
-    private Evolucion evolucion; // Referencia directa a la evolución
-    private String rutaPdf;
+
 
     public Receta() {}
 
-    public Receta(LocalDateTime fecha, List<MedicamentoRecetado> medicamentos, Evolucion evolucion, String rutaPdf, String nombreMedico, String especialidadMedico) {
+    public Receta(LocalDateTime fecha, List<MedicamentoRecetado> medicamentos, String nombreMedico, String especialidadMedico) {
         this.fecha = fecha;
         this.medicamentos = medicamentos != null ? medicamentos : new ArrayList<>();
-        this.evolucion = evolucion;
         this.anulada = false;
-        this.rutaPdf = rutaPdf;
         this.nombreMedico = nombreMedico;
         this.especialidadMedico = especialidadMedico;
+        this.id = System.currentTimeMillis();
     }
 
     public void anular() {
@@ -46,11 +44,5 @@ public class Receta {
         medicamentos.remove(medicamento);
     }
 
-    public void asignarRutaPdf(String rutaPdf) {
-        if (rutaPdf == null || rutaPdf.isEmpty()) {
-            throw new IllegalArgumentException("La ruta del PDF no puede ser nula o vacía.");
-        }
-        this.rutaPdf = rutaPdf;
-    }
 
 }

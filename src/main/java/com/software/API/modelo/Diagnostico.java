@@ -70,33 +70,34 @@ public class Diagnostico {
     // Método para crear y agregar una evolución
     public Evolucion crearYAgregarEvolucion(String texto, String nombreMedico, String especialidadMedico,
                                             PlantillaControl plantillaControl, PlantillaLaboratorio plantillaLaboratorio) {
-        // Validar parámetros
-        if (texto == null || texto.isEmpty()) {
-            throw new IllegalArgumentException("El texto no puede ser nulo o vacío.");
-        }
-        if (nombreMedico == null || nombreMedico.isEmpty()) {
-            throw new IllegalArgumentException("El nombre del médico no puede ser nulo o vacío.");
-        }
-        if (especialidadMedico == null || especialidadMedico.isEmpty()) {
-            throw new IllegalArgumentException("La especialidad del médico no puede ser nula o vacía.");
+
+        if (nombreMedico == null || nombreMedico.isEmpty() || especialidadMedico == null || especialidadMedico.isEmpty()) {
+            throw new IllegalArgumentException("El nombre y la especialidad del médico son obligatorios.");
         }
 
-        // Crear una nueva evolución
-        Evolucion evolucion = new Evolucion(
+        Evolucion nuevaEvolucion = new Evolucion (
                 texto,
                 LocalDateTime.now(),
                 nombreMedico,
                 especialidadMedico,
                 plantillaControl,
                 plantillaLaboratorio,
-                new ArrayList<>(),
-                ""
+                new ArrayList<>()
         );
 
-        // Agregar la evolución a la lista del diagnóstico
-        this.evoluciones.add(evolucion);
-
-        // Retornar la evolución creada
-        return evolucion;
+        evoluciones.add(nuevaEvolucion);
+        return nuevaEvolucion;
     }
+
+
+    public Receta crearReceta(List<String> medicamentos, Long evolucionId, String nombreMedico, String especialidadMedico) {
+        Evolucion evolucion = this.evoluciones.stream()
+                .filter(e -> e.getId().equals(evolucionId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Evolución no encontrada con ID: " + evolucionId));
+
+        return evolucion.crearReceta(medicamentos, nombreMedico, especialidadMedico);
+    }
+
+
 }

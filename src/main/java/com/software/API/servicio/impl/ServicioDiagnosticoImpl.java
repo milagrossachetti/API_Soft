@@ -1,6 +1,7 @@
 package com.software.API.servicio.impl;
 
 
+
 import com.software.API.DTOs.EvolucionDTO;
 import com.software.API.excepcion.*;
 import com.software.API.modelo.*;
@@ -61,20 +62,20 @@ public class ServicioDiagnosticoImpl implements ServicioDiagnostico {
 
         // Crear el diagnóstico
         Diagnostico nuevoDiagnostico = new Diagnostico(nombreDiagnostico, historiaClinica, nombreMedico, especialidadMedico);
-        logger.info("ID asignado al diagnóstico antes de asignarle con currentTime: {}", nuevoDiagnostico.getId());
+
+        //ERROR POR PERDIDA DE ID-NO SE ALMACENA
         // Asignar un ID único manualmente
         nuevoDiagnostico.setId(System.currentTimeMillis()); // O una lógica personalizada para generar IDs
 
-        logger.info("ID asignado al diagnóstico despues de asignarle con currentTime: {}", nuevoDiagnostico.getId());
 
         // Agregar el diagnóstico a la historia clínica usando el método encapsulado
         paciente.agregarDiagnostico(nuevoDiagnostico);
 
-        logger.info("ID asignado al diagnóstico despues de agregar el diagnostico a paciente: {}", nuevoDiagnostico.getId());
         // Guardar los cambios en el repositorio del paciente
         repositorioPaciente.guardarPaciente(paciente);
 
-        logger.info("ID asignado al diagnóstico despues de guardar en repositorio paciente y antes de enviar el valor a crearEvolucion: {}", nuevoDiagnostico.getId());
+        nuevoDiagnostico.setId(System.currentTimeMillis());
+        logger.info("ID del diagnóstico después de asignar nuevo ID: {}", nuevoDiagnostico.getId());
         // Crear la evolución inicial asociada al diagnóstico
         servicioEvolucion.crearEvolucion(
                 cuilPaciente,
@@ -83,7 +84,7 @@ public class ServicioDiagnosticoImpl implements ServicioDiagnostico {
                 nombreMedico,
                 especialidadMedico
         );
-        logger.info("ID asignado al diagnóstico al regresar de crear evolucion: {}", nuevoDiagnostico.getId());
+
         // Registrar la creación en los logs
         logger.info("Diagnóstico '{}' creado para el paciente con CUIL: {}", nombreDiagnostico, cuilPaciente);
 

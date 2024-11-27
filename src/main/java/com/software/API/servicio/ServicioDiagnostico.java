@@ -17,17 +17,5 @@ public interface ServicioDiagnostico {
      */
     List<Diagnostico> obtenerDiagnosticosDelHistorialClinicoDelPaciente(Long cuilPaciente);
 
-    /**
-     * Crea un nuevo diagnóstico para un paciente específico y lo asocia a su historial clínico.
-     * Además, crea una evolución inicial asociada al diagnóstico.
-     *
-     * @param cuilPaciente CUIL del paciente.
-     * @param nombreDiagnostico Nombre del diagnóstico.
-     * @param evolucionDTO Datos de la evolución inicial asociados al diagnóstico.
-     * @param nombreMedico Usuario médico que crea el diagnóstico.
-     * @param especialidadMedico Usuario médico que crea el diagnóstico.
-     * @return El diagnóstico creado.
-     */
     Diagnostico crearDiagnostico(Long cuilPaciente, String nombreDiagnostico, EvolucionDTO evolucionDTO, String nombreMedico, String especialidadMedico);
 }
-

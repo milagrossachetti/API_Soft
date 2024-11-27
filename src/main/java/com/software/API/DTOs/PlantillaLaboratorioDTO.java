@@ -14,6 +14,8 @@ import java.util.List;
 @Getter
 @Setter
 public class PlantillaLaboratorioDTO {
+
+
     @NotNull
     @Size(min = 1, message = "Debe haber al menos un tipo de estudio.")
     private List<String> tiposEstudios;
@@ -22,14 +24,14 @@ public class PlantillaLaboratorioDTO {
     @Size(min = 1, message = "Debe haber al menos un ítem seleccionado.")
     private List<String> items;
 
-    private String estado;
+
 
     public PlantillaLaboratorioDTO() {}
 
-    public PlantillaLaboratorioDTO(List<String> tiposEstudios, List<String> items, String estado) {
+    public PlantillaLaboratorioDTO(List<String> tiposEstudios, List<String> items) {
         this.tiposEstudios = tiposEstudios;
         this.items = items;
-        this.estado = estado;
+
     }
 }
 

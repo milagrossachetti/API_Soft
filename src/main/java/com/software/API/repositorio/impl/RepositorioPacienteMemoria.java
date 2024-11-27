@@ -24,15 +24,16 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
 
         // Crear Diagnóstico y Evoluciones
         Diagnostico diagnostico1 = new Diagnostico("Fiebre tifoidea", historia1, "Dr. Juan Pérez", "Cardiología");
+        diagnostico1.setId(1L); // Asignar ID único al diagnóstico
+
         Evolucion evolucion1 = new Evolucion(
                 "Paciente presenta fiebre persistente.",
                 LocalDateTime.now(),
                 "Dr. Juan Pérez", // Nombre del médico
                 "Cardiología", // Especialidad
                 new PlantillaControl(65.5, 1.70, "120/80", 80, 98, null),
-                null,
-                new ArrayList<>(),
-                null
+                null, // Sin plantilla de laboratorio
+                new ArrayList<>() // Sin recetas al inicio
         );
         diagnostico1.agregarEvolucion(evolucion1);
 
@@ -41,46 +42,43 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                 LocalDateTime.now(),
                 "Dr. Pedro Martínez", // Otro médico
                 "Pediatría", // Especialidad
-                null,
-                null,
+                null, // Sin plantilla de control
+                null, // Sin plantilla de laboratorio
                 Arrays.asList(new Receta(
                         LocalDateTime.now(),
                         Arrays.asList(
                                 new MedicamentoRecetado("Paracetamol"),
                                 new MedicamentoRecetado("Ibuprofeno")
                         ),
-                        evolucion1,
-                        "Dr. Pedro Martínez",
-                        "Pediatría",
-                        "Fiebre tifoidea"
-                )),
-                null
+                        "Dr. Pedro Martínez", // Médico
+                        "Pediatría" // Especialidad
+                ))
         );
         diagnostico1.agregarEvolucion(evolucion2);
 
         historia1.getDiagnosticos().add(diagnostico1);
 
         Diagnostico diagnostico2 = new Diagnostico("Sinusitis frontal aguda", historia1, "Dr. Pedro Martínez", "Pediatría");
+        diagnostico2.setId(2L); // Asignar ID único al diagnóstico
+
         Evolucion evolucion3 = new Evolucion(
                 "Paciente con congestión severa y dolor frontal.",
                 LocalDateTime.now(),
                 "Dr. Pedro Martínez", // Mismo médico del diagnóstico
                 "Pediatría", // Especialidad
-                new PlantillaControl(68.0, 1.75, "130/85", 85, 96, null),
-                null,
-                new ArrayList<>(),
-                null
+                new PlantillaControl(68.0, 1.75, "130/85", 85, 96, null), // Plantilla de control
+                null, // Sin plantilla de laboratorio
+                new ArrayList<>() // Sin recetas al inicio
         );
+
         Receta receta = new Receta(
                 LocalDateTime.now(),
                 Arrays.asList(
                         new MedicamentoRecetado("Amoxicilina"),
                         new MedicamentoRecetado("Aspirina")
                 ),
-                evolucion3,
-                "Dr. Pedro Martínez",
-                "Pediatría",
-                "Sinusitis frontal aguda"
+                "Dr. Pedro Martínez", // Médico
+                "Pediatría" // Especialidad
         );
         evolucion3.getRecetas().add(receta);
         diagnostico2.agregarEvolucion(evolucion3);
@@ -136,6 +134,4 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                     }
                 });
     }
-
-
 }

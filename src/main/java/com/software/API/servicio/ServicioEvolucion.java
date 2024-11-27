@@ -2,6 +2,7 @@ package com.software.API.servicio;
 
 import com.software.API.DTOs.EvolucionDTO;
 import com.software.API.modelo.Evolucion;
+import com.software.API.modelo.Paciente;
 import com.software.API.modelo.Receta;
 import com.software.API.modelo.Usuario;
 
@@ -39,22 +40,6 @@ public interface ServicioEvolucion {
      * @param especialidadMedico
      * @return La receta creada.
      */
-    Receta crearReceta(List<String> nombresMedicamentos, Evolucion evolucion, String nombreMedico, String especialidadMedico) ;
+    Receta crearReceta(List<String> nombresMedicamentos, Long diagnosticoId, Long evolucionId, Paciente paciente, String nombreMedico, String especialidadMedico);
 
-    /**
-     * Genera un archivo PDF para una receta específica.
-     *
-     * @param receta Receta para la cual se generará el PDF.
-     */
-    void generarPdfReceta(Receta receta);
-
-    /**
-     * Envía por correo electrónico el PDF de una evolución específica.
-     *
-     * @param cuilPaciente CUIL del paciente.
-     * @param diagnosticoId ID del diagnóstico.
-     * @param evolucionId ID de la evolución.
-     * @param email Dirección de correo electrónico a la cual enviar el PDF.
-     */
-    void enviarPdfEvolucion(Long cuilPaciente, Long diagnosticoId, Long evolucionId, String email);
 }

@@ -51,5 +51,16 @@ public class HistoriaClinica {
     }
 
 
+    public Evolucion crearYAgregarEvolucion(Long diagnosticoId, String texto, String nombreMedico, String especialidadMedico,
+                                            PlantillaControl plantillaControl, PlantillaLaboratorio plantillaLaboratorio) {
+        Diagnostico diagnostico = obtenerDiagnosticoPorId(diagnosticoId);
+        return diagnostico.crearYAgregarEvolucion(texto, nombreMedico, especialidadMedico, plantillaControl, plantillaLaboratorio);
+    }
+
+    public Receta crearReceta(List<String> medicamentos, Long diagnosticoId, Long evolucionId, String nombreMedico, String especialidadMedico) {
+        Diagnostico diagnostico = obtenerDiagnosticoPorId(diagnosticoId);
+        return diagnostico.crearReceta(medicamentos, evolucionId, nombreMedico, especialidadMedico);
+    }
+
 
 }

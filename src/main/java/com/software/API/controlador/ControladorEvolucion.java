@@ -33,58 +33,37 @@ public class ControladorEvolucion {
 
 
     private final ServicioEvolucion servicioEvolucion;
-    private final ServicioDiagnostico servicioDiagnostico;
-
     private final ServicioUsuario servicioUsuario;
 
     public ControladorEvolucion(
             ServicioEvolucion servicioEvolucion,
-            ServicioDiagnostico servicioDiagnostico,
             ServicioUsuario servicioUsuario) {
         this.servicioEvolucion = servicioEvolucion;
-        this.servicioDiagnostico = servicioDiagnostico;
         this.servicioUsuario = servicioUsuario;
     }
 
-
-        //CREAR DIAGNOSTICO
-        @PostMapping("/diagnosticos/crear-diagnostico")
-        public ResponseEntity<Object> crearDiagnostico(@RequestBody @Valid DiagnosticoDTO diagnosticoDTO) {
-            try {
-    
-                // Extraer solo los valores necesarios
-                String nombreMedico = servicioUsuario.obtenerNombreCompletoMedicoAutenticado();
-                String especialidadMedico = servicioUsuario.obtenerEspecialidadMedicoAutenticado();
-    
-                // Pasar los valores al servicio
-                Diagnostico diagnostico = servicioDiagnostico.crearDiagnostico(
-                        diagnosticoDTO.getPacienteDTO().getCuil(),
-                        diagnosticoDTO.getNombreDiagnostico(),
-                        diagnosticoDTO.getEvolucionDTO(),
-                        nombreMedico,
-                        especialidadMedico
-                );
-                return ResponseEntity.status(HttpStatus.CREATED).body(diagnostico);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-            }
-        }
-
-
-
     //CREAR EVOLUCION
-    @PostMapping("/pacientes/{cuilPaciente}/diagnosticos/{diagnosticoId}/evoluciones")
+    @PostMapping("/evoluciones/{cuilPaciente}/{diagnosticoId}")
     public ResponseEntity<Object> agregarEvolucion(
             @PathVariable Long cuilPaciente,
             @PathVariable Long diagnosticoId,
             @RequestBody @Valid EvolucionDTO evolucionDTO) {
         try {
-            // Validación preliminar del DTO
-            if (evolucionDTO.getTexto() == null || evolucionDTO.getTexto().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El texto de la evolución no puede estar vacío.");
+            // Validar preliminarmente que el DTO no sea nulo y tenga contenido
+            if (evolucionDTO == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El cuerpo de la evolución no puede ser nulo.");
             }
 
-            // Extraer solo los valores necesarios
+            boolean tieneContenido = (evolucionDTO.getTexto() != null && !evolucionDTO.getTexto().isEmpty()) ||
+                    evolucionDTO.getPlantillaControl() != null ||
+                    evolucionDTO.getPlantillaLaboratorio() != null ||
+                    (evolucionDTO.getRecetas() != null && !evolucionDTO.getRecetas().isEmpty());
+
+            if (!tieneContenido) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La evolución debe tener al menos texto, plantilla de control, plantilla de laboratorio o una receta.");
+            }
+
+            // Obtener datos del médico autenticado
             String nombreMedico = servicioUsuario.obtenerNombreCompletoMedicoAutenticado();
             String especialidadMedico = servicioUsuario.obtenerEspecialidadMedicoAutenticado();
 
@@ -95,17 +74,17 @@ public class ControladorEvolucion {
             return ResponseEntity.status(HttpStatus.CREATED).body(evolucion);
 
         } catch (PacienteNoEncontradoException | DiagnosticoNoEncontradoException e) {
+            // Manejar errores de entidad no encontrada
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
+            // Manejar errores de validación
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
+            // Manejar errores inesperados
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado: " + e.getMessage());
         }
     }
 
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
-    }
 }
+
+
