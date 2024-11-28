@@ -12,7 +12,6 @@ import java.util.List;
 @Setter
 public class Diagnostico {
     private Long id;
-    private HistoriaClinica historiaClinica;
     private String nombreDiagnostico;
     private String nombreMedico; // Nombre del médico que creó el diagnóstico
     private String especialidadMedico; // Especialidad del médico
@@ -39,18 +38,10 @@ public class Diagnostico {
         this.especialidadMedico = especialidadMedico;
     }
 
-    // Constructor con historia clínica
-    public Diagnostico(String nombreDiagnostico, HistoriaClinica historiaClinica, String nombreMedico, String especialidadMedico) {
-        this(nombreDiagnostico, nombreMedico, especialidadMedico);
-        if (historiaClinica == null) {
-            throw new IllegalArgumentException("La historia clínica no puede ser nula.");
-        }
-        this.historiaClinica = historiaClinica;
-    }
 
     // Constructor con nombre, historia clínica y evolución inicial
     public Diagnostico(String nombreDiagnostico, HistoriaClinica historiaClinica, Evolucion primeraEvolucion, String nombreMedico, String especialidadMedico) {
-        this(nombreDiagnostico, historiaClinica, nombreMedico, especialidadMedico);
+        this(nombreDiagnostico, nombreMedico, especialidadMedico);
         agregarEvolucion(primeraEvolucion);
     }
 

@@ -57,11 +57,8 @@ public class ServicioDiagnosticoImpl implements ServicioDiagnostico {
             throw new HistoriaClinicaNoEncontradaException("El paciente no tiene una historia clínica asociada.");
         }
 
-        // Obtener la historia clínica del paciente
-        HistoriaClinica historiaClinica = paciente.obtenerHistoriaClinica();
-
         // Crear el diagnóstico
-        Diagnostico nuevoDiagnostico = new Diagnostico(nombreDiagnostico, historiaClinica, nombreMedico, especialidadMedico);
+        Diagnostico nuevoDiagnostico = new Diagnostico(nombreDiagnostico, nombreMedico, especialidadMedico);
 
         //ERROR POR PERDIDA DE ID-NO SE ALMACENA
         // Asignar un ID único manualmente

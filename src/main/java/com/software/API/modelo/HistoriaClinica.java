@@ -1,5 +1,6 @@
 package com.software.API.modelo;
 
+
 import com.software.API.excepcion.DiagnosticoNoEncontradoException;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
@@ -10,7 +11,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 public class HistoriaClinica {
 
@@ -19,16 +19,10 @@ public class HistoriaClinica {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate fechaCreacion;
 
-    private Paciente paciente;
-
     private List<Diagnostico> diagnosticos = new ArrayList<>();
 
     // Constructor con validación
-    public HistoriaClinica(Paciente paciente) {
-        if (paciente == null) {
-            throw new IllegalArgumentException("El paciente es obligatorio.");
-        }
-        this.paciente = paciente;
+    public HistoriaClinica() {
         this.fechaCreacion = LocalDate.now();
     }
 

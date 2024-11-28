@@ -1,5 +1,6 @@
 package com.software.API.modelo;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.software.API.excepcion.HistoriaClinicaNoEncontradaException;
 import lombok.Getter;
 import lombok.Setter;

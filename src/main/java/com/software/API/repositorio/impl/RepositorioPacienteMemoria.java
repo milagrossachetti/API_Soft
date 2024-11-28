@@ -23,7 +23,7 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
         historia1.setId(1L);
 
         // Crear Diagnóstico y Evoluciones
-        Diagnostico diagnostico1 = new Diagnostico("Fiebre tifoidea", historia1, "Dr. Juan Pérez", "Cardiología");
+        Diagnostico diagnostico1 = new Diagnostico("Fiebre tifoidea", "Dr. Juan Pérez", "Cardiología");
         diagnostico1.setId(1L); // Asignar ID único al diagnóstico
 
         Evolucion evolucion1 = new Evolucion(
@@ -58,7 +58,7 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
 
         historia1.getDiagnosticos().add(diagnostico1);
 
-        Diagnostico diagnostico2 = new Diagnostico("Sinusitis frontal aguda", historia1, "Dr. Pedro Martínez", "Pediatría");
+        Diagnostico diagnostico2 = new Diagnostico("Sinusitis frontal aguda", "Dr. Pedro Martínez", "Pediatría");
         diagnostico2.setId(2L); // Asignar ID único al diagnóstico
 
         Evolucion evolucion3 = new Evolucion(
