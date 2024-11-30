@@ -62,11 +62,7 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
             throw new PacienteNoEncontradoException("Paciente no encontrado con CUIL: " + cuilPaciente);
         }
 
-        // Validar obra social
-        boolean obraSocialValida = servicioAPISalud.verificarObraSocial(paciente.getObraSocial().getCodigo());
-        if (!obraSocialValida) {
-            throw new IllegalArgumentException("Obra social no válida");
-        }
+        validarObraSocial(paciente.getObraSocial().getCodigo());
 
         // Validar que al menos uno de los campos esté presente
         boolean tieneContenido = (evolucionDTO.getTexto() != null && !evolucionDTO.getTexto().isEmpty()) ||
@@ -107,10 +103,8 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                     throw new IllegalArgumentException("Las recetas deben contener al menos un medicamento.");
                 }
 
-                // Validar medicamentos
-                boolean medicamentosValidos = servicioAPISalud.verificarMedicamentos(medicamentos);
-                if (!medicamentosValidos) {
-                    throw new IllegalArgumentException("Medicamentos no válidos");
+                for (String medicamento : medicamentos) {
+                    validarMedicamentoPorNombre(medicamento);  // Verificar si el medicamento es válido
                 }
 
                 Receta receta = crearReceta(
@@ -159,16 +153,10 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
             throw new RecetaInvalidaException("Solo se permiten hasta 2 medicamentos por receta.");
         }
 
-        // Validar obra social
-        boolean obraSocialValida = servicioAPISalud.verificarObraSocial(paciente.getObraSocial().getCodigo());
-        if (!obraSocialValida) {
-            throw new IllegalArgumentException("Obra social no válida");
-        }
+        validarObraSocial(paciente.getObraSocial().getCodigo());
 
-        // Validar medicamentos
-        boolean medicamentosValidos = servicioAPISalud.verificarMedicamentos(nombresMedicamentos);
-        if (!medicamentosValidos) {
-            throw new IllegalArgumentException("Medicamentos no válidos");
+        for (String medicamento : nombresMedicamentos) {
+            validarMedicamentoPorNombre(medicamento);  // Verificar si el medicamento es válido
         }
 
         // Delegar la creación de la receta al flujo jerárquico desde paciente
@@ -200,6 +188,31 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
     private PlantillaLaboratorio convertirPlantillaLaboratorioDTO(PlantillaLaboratorioDTO dto) {
         if (dto == null) return null;
         return new PlantillaLaboratorio(dto.getTiposEstudios(), dto.getItems());
+    }
+
+    public void validarObraSocial(String codigoObraSocial) {
+        try {
+            ObraSocial obraSocial = servicioAPISalud.obtenerObraSocialPorCodigo(codigoObraSocial);
+            if (obraSocial == null) {
+                throw new IllegalArgumentException("La obra social no existe.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al validar la obra social: " + e.getMessage(), e);
+        }
+    }
+
+    public void validarMedicamentoPorNombre(String nombreMedicamento) {
+        try {
+            // Llamar al método para obtener medicamentos por descripción
+            List<Medicamento> medicamentos = servicioAPISalud.obtenerMedicamentosPorDescripcion(nombreMedicamento);
+
+            // Verificar si la lista de medicamentos está vacía o no
+            if (medicamentos.isEmpty()) {
+                throw new IllegalArgumentException("El medicamento con el nombre '" + nombreMedicamento + "' no existe.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al validar el medicamento por nombre: " + e.getMessage(), e);
+        }
     }
 
     @Override

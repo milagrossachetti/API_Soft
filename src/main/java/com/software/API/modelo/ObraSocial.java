@@ -1,20 +1,14 @@
 package com.software.API.modelo;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class ObraSocial {
-    private Long id;
-    private String nombre;
     private String codigo;
-
-    public ObraSocial() {}
-
-    public ObraSocial(Long id, String nombre, String codigo) {
-        this.id = id;
-        this.nombre = nombre;
-        this.codigo = codigo;
-    }
+    private String denominacion;
+    private String sigla;
 }

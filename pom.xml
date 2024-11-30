@@ -27,9 +27,9 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>21</java.version>
-		<maven.compiler.source>21</maven.compiler.source>
-		<maven.compiler.target>21</maven.compiler.target>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -183,8 +183,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version> <!-- Puedes usar la última versión disponible -->
 				<configuration>
-					<source>21</source> <!-- Versión de Java utilizada para el código fuente -->
-					<target>21</target> <!-- Versión de bytecode generado -->
+					<source>17</source> <!-- Versión de Java utilizada para el código fuente -->
+					<target>17</target> <!-- Versión de bytecode generado -->
 				</configuration>
 			</plugin>
 

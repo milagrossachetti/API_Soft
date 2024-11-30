@@ -98,7 +98,7 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                 "Tucuman",
                 "Argentina",
                 "AF123456",
-                new ObraSocial(2L, "Obra Social 2", "OS2") // Historia clínica ID
+                new ObraSocial("128409", "OBRA SOCIAL DEL SINDICATO OBREROS Y EMPLEADOS DE EMPRESAS DE LIMPIEZA,SERVICIOS Y AFINES DE CORDOBA", "OSSOELSAC") // Historia clínica ID
         );
         paciente1.setHistoriaClinica(historia1);
         pacientes.add(paciente1);
@@ -164,7 +164,7 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                 "Tucuman",
                 "Argentina",
                 "BF654321",
-                new ObraSocial(2L, "Obra Social 2", "OS2") // Historia clínica ID
+                new ObraSocial("", "OBRA SOCIAL FEDERAL DE LA FEDERACION NACIONAL DE TRABAJADORES DE OBRAS SANITARIAS", "OSFFENTOS") // Historia clínica ID
         );
         paciente2.setHistoriaClinica(historia2);
         pacientes.add(paciente2);

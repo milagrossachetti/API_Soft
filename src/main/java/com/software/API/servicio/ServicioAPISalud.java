@@ -1,6 +1,7 @@
 package com.software.API.servicio;
 
 import com.software.API.modelo.Medicamento;
+import com.software.API.modelo.ObraSocial;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -11,9 +12,13 @@ import java.util.List;
 
 public interface ServicioAPISalud {
 
-    boolean verificarObraSocial(String codigo);
-
-    boolean verificarMedicamentos(List<String> medicamentos);
-
     List<Medicamento> obtenerTodosLosMedicamentos(int pagina, int limite);
+
+    Medicamento obtenerMedicamento(int codigo);
+
+    List<Medicamento> obtenerMedicamentosPorDescripcion(String descripcion);
+
+    List<ObraSocial> obtenerTodasLasObrasSociales();
+
+    ObraSocial obtenerObraSocialPorCodigo(String codigo);
 }
