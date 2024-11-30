@@ -11,7 +11,6 @@ import com.software.API.DTOs.*;
 import com.software.API.excepcion.*;
 import com.software.API.modelo.*;
 import com.software.API.repositorio.*;
-import com.software.API.repositorio.RepositorioAPISalud;
 import com.software.API.servicio.ServicioAPISalud;
 import com.software.API.servicio.ServicioEvolucion;
 import jakarta.mail.MessagingException;
@@ -27,22 +26,19 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ServicioEvolucionImpl implements ServicioEvolucion {
 
     private final RepositorioPaciente repositorioPaciente;
     private final ServicioAPISalud servicioAPISalud;
-    private final RepositorioAPISalud repositorioAPISalud;
     private final JavaMailSender mailSender;
 
     private static final Logger logger = LoggerFactory.getLogger(ServicioEvolucion.class);
 
-    public ServicioEvolucionImpl(RepositorioPaciente repositorioPaciente, ServicioAPISalud servicioAPISalud, RepositorioAPISalud repositorioAPISalud, JavaMailSender mailSender) {
+    public ServicioEvolucionImpl(RepositorioPaciente repositorioPaciente, ServicioAPISalud servicioAPISalud, JavaMailSender mailSender) {
         this.repositorioPaciente = repositorioPaciente;
         this.servicioAPISalud = servicioAPISalud;
-        this.repositorioAPISalud = repositorioAPISalud;
         this.mailSender = mailSender;
     }
 
@@ -59,6 +55,17 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
     public Evolucion crearEvolucion(Long cuilPaciente, Long diagnosticoId, EvolucionDTO evolucionDTO, String nombreMedico, String especialidadMedico) {
         if (evolucionDTO == null) {
             throw new IllegalArgumentException("Los datos de la evolución no pueden ser nulos.");
+        }
+
+        Paciente paciente = obtenerPacientePorCuil(cuilPaciente);
+        if (paciente == null) {
+            throw new PacienteNoEncontradoException("Paciente no encontrado con CUIL: " + cuilPaciente);
+        }
+
+        // Validar obra social
+        boolean obraSocialValida = servicioAPISalud.verificarObraSocial(paciente.getObraSocial().getCodigo());
+        if (!obraSocialValida) {
+            throw new IllegalArgumentException("Obra social no válida");
         }
 
         // Validar que al menos uno de los campos esté presente
@@ -82,12 +89,6 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
             throw new IllegalArgumentException("El nombre y la especialidad del médico son obligatorios.");
         }
 
-        // Obtener el paciente de manera encapsulada
-        Paciente paciente = obtenerPacientePorCuil(cuilPaciente);
-        if (paciente == null) {
-            throw new PacienteNoEncontradoException("Paciente no encontrado con CUIL: " + cuilPaciente);
-        }
-
         // Crear la evolución a través del flujo jerárquico
         Evolucion nuevaEvolucion = paciente.crearYAgregarEvolucion(
                 diagnosticoId,
@@ -104,6 +105,12 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                 List<String> medicamentos = recetaDTO.getMedicamentos();
                 if (medicamentos == null || medicamentos.isEmpty()) {
                     throw new IllegalArgumentException("Las recetas deben contener al menos un medicamento.");
+                }
+
+                // Validar medicamentos
+                boolean medicamentosValidos = servicioAPISalud.verificarMedicamentos(medicamentos);
+                if (!medicamentosValidos) {
+                    throw new IllegalArgumentException("Medicamentos no válidos");
                 }
 
                 Receta receta = crearReceta(
@@ -124,12 +131,12 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                 }
             }
         } else if (evolucionDTO.getPlantillaLaboratorio() != null) {
-                byte[] pdfLaboratorio = generarPDFLaboratorio(paciente.getNombreCompleto(), nombreMedico, especialidadMedico, evolucionDTO.getPlantillaLaboratorio().getTiposEstudios(),  evolucionDTO.getPlantillaLaboratorio().getItems());
-                try {
-                    enviarEmailConAdjunto("cisterna2728@gmail.com", "Pedido de Laboratorio", "Adjunto encontrarás el pedido de laboratorio.", pdfLaboratorio, "laboratorio.pdf");
-                } catch (MessagingException e) {
-                    logger.error("Error al enviar el correo: ", e);
-                }
+            byte[] pdfLaboratorio = generarPDFLaboratorio(paciente.getNombreCompleto(), nombreMedico, especialidadMedico, evolucionDTO.getPlantillaLaboratorio().getTiposEstudios(),  evolucionDTO.getPlantillaLaboratorio().getItems());
+            try {
+                enviarEmailConAdjunto("cisterna2728@gmail.com", "Pedido de Laboratorio", "Adjunto encontrarás el pedido de laboratorio.", pdfLaboratorio, "laboratorio.pdf");
+            } catch (MessagingException e) {
+                logger.error("Error al enviar el correo: ", e);
+            }
         }
 
         // Guardar los cambios en el repositorio
@@ -152,8 +159,17 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
             throw new RecetaInvalidaException("Solo se permiten hasta 2 medicamentos por receta.");
         }
 
-        // Validar medicamentos con la API de salud
-        validarMedicamentos(nombresMedicamentos);
+        // Validar obra social
+        boolean obraSocialValida = servicioAPISalud.verificarObraSocial(paciente.getObraSocial().getCodigo());
+        if (!obraSocialValida) {
+            throw new IllegalArgumentException("Obra social no válida");
+        }
+
+        // Validar medicamentos
+        boolean medicamentosValidos = servicioAPISalud.verificarMedicamentos(nombresMedicamentos);
+        if (!medicamentosValidos) {
+            throw new IllegalArgumentException("Medicamentos no válidos");
+        }
 
         // Delegar la creación de la receta al flujo jerárquico desde paciente
         Receta receta = paciente.crearReceta(
@@ -176,24 +192,6 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                 .orElseThrow(() -> new PacienteNoEncontradoException("Paciente no encontrado con CUIL: " + cuil));
     }
 
-
-    // Validar medicamentos utilizando el ServicioAPISalud
-    private void validarMedicamentos(List<String> nombresMedicamentos) {
-        List<Medicamento> apiResult = repositorioAPISalud.obtenerMedicamentos();
-
-        // Lista de nombres válidos desde la API
-        List<String> nombresValidos = apiResult.stream()
-                .map(Medicamento::getNombre)
-                .collect(Collectors.toList());
-
-        // Validar que todos los medicamentos ingresados estén en la lista válida
-        for (String nombre : nombresMedicamentos) {
-            if (!nombresValidos.contains(nombre)) {
-                throw new MedicamentoInvalidoException("El medicamento " + nombre + " no es válido.");
-            }
-        }
-    }
-
     private PlantillaControl convertirPlantillaControlDTO(PlantillaControlDTO dto) {
         if (dto == null) return null;
         return new PlantillaControl(dto.getPeso(), dto.getAltura(), dto.getPresion(), dto.getPulso(), dto.getSaturacion(), dto.getNivelAzucar());
@@ -204,7 +202,7 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
         return new PlantillaLaboratorio(dto.getTiposEstudios(), dto.getItems());
     }
 
-@Override
+    @Override
     public byte[] generarPDFReceta(Long numeroReceta, @NotNull List<String> medicamentos, String nombrePaciente, String nombreMedico, String especialidadMedico) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
