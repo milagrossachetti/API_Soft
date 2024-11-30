@@ -4,7 +4,7 @@ import com.software.API.DTOs.EvolucionDTO;
 import com.software.API.modelo.Evolucion;
 import com.software.API.modelo.Paciente;
 import com.software.API.modelo.Receta;
-import com.software.API.modelo.Usuario;
+import jakarta.mail.MessagingException;
 
 import java.util.List;
 
@@ -35,11 +35,47 @@ public interface ServicioEvolucion {
      * Crea una receta asociada a una evolución específica.
      *
      * @param nombresMedicamentos Lista de nombres de medicamentos a incluir en la receta.
-     * @param evolucion Evolución a la que se asocia la receta.
+     * @param evolucionId Id Evolución a la que se asocia la receta.
      * @param nombreMedico Médico que crea la receta.
      * @param especialidadMedico
      * @return La receta creada.
      */
     Receta crearReceta(List<String> nombresMedicamentos, Long diagnosticoId, Long evolucionId, Paciente paciente, String nombreMedico, String especialidadMedico);
 
+    /**
+     * Genera un PDF para una receta médica.
+     *
+     * @param numeroReceta Número de la receta.
+     * @param medicamentos Lista de medicamentos incluidos en la receta.
+     * @param nombrePaciente Nombre del paciente.
+     * @param nombreMedico Nombre del médico.
+     * @param especialidadMedico Especialidad del médico.
+     * @return Un array de bytes que representa el PDF generado.
+     */
+    byte[] generarPDFReceta(Long numeroReceta, List<String> medicamentos, String nombrePaciente, String nombreMedico, String especialidadMedico);
+
+
+    /**
+     * Genera un PDF para un pedido de laboratorio.
+     *
+     * @param nombrePaciente Nombre del paciente.
+     * @param nombreMedico Nombre del médico.
+     * @param especialidadMedico Especialidad del médico.
+     * @param tiposEstudios Lista de tipos de estudios solicitados.
+     * @param items Lista de ítems solicitados.
+     * @return Un array de bytes que representa el PDF generado.
+     */
+    byte[] generarPDFLaboratorio(String nombrePaciente, String nombreMedico, String especialidadMedico, List<String> tiposEstudios, List<String> items);
+
+    /**
+     * Envía un correo electrónico con un archivo adjunto.
+     *
+     * @param destinatario Dirección de correo del destinatario.
+     * @param asunto Asunto del correo.
+     * @param cuerpo Cuerpo del correo.
+     * @param adjunto Archivo adjunto en formato de array de bytes.
+     * @param nombreAdjunto Nombre del archivo adjunto.
+     * @throws MessagingException Si ocurre un error al enviar el correo.
+     */
+    void enviarEmailConAdjunto(String destinatario, String asunto, String cuerpo, byte[] adjunto, String nombreAdjunto) throws MessagingException;
 }

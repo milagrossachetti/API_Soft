@@ -115,11 +115,6 @@
 			<version>3.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>jakarta.validation</groupId>
-			<artifactId>jakarta.validation-api</artifactId>
-			<version>3.0.0</version>
-		</dependency>
-		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>5.0.0</version>
@@ -131,13 +126,11 @@
 			<version>3.1.0</version>
 		</dependency>
 
-		<!-- Núcleo de iText para generar PDFs -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>kernel</artifactId>
-			<version>9.0.0</version>
+			<version>7.1.14</version>
 		</dependency>
-		<!-- Layout para agregar elementos como párrafos, tablas, etc. al PDF -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>layout</artifactId>
@@ -155,9 +148,16 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.33</version> <!-- Usa la versión más reciente compatible -->
+			<version>8.0.33</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+		</dependency>
 
 	</dependencies>
 

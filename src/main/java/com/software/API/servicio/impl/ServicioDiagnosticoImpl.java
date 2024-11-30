@@ -64,7 +64,6 @@ public class ServicioDiagnosticoImpl implements ServicioDiagnostico {
         // Asignar un ID único manualmente
         nuevoDiagnostico.setId(System.currentTimeMillis()); // O una lógica personalizada para generar IDs
 
-
         // Agregar el diagnóstico a la historia clínica usando el método encapsulado
         paciente.agregarDiagnostico(nuevoDiagnostico);
 

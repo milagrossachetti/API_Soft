@@ -32,8 +32,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ControladorUsuario {
     @Autowired
     ServicioUsuario servicioUsuario;
+
     @Autowired
     private final AuthenticationManager authenticationManager;
+
     @Autowired
     private SecurityContextRepository securityContextRepository;
 
@@ -54,11 +56,9 @@ public class ControladorUsuario {
         return ResponseEntity.ok().body("usuario autenticado");
     }
 
-
     @GetMapping("/buscar/{cuil}")
     public ResponseEntity<Usuario> buscarUsuario(@PathVariable Long cuil) {
         Usuario buscarUsuario = servicioUsuario.buscarUsuario(cuil);
         return ResponseEntity.ok(buscarUsuario);
     }
-
 }

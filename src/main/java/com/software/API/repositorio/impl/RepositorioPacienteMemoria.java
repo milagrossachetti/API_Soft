@@ -92,7 +92,7 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                 "Brenda Marinelli",
                 new Date(93, 4, 15),
                 "3816404000",
-                "marinellibrendaluciana@gmail.com",
+                "cisterna2728@gmail.com",
                 "Esteban Echeverria 2200",
                 "San Miguel de Tucuman",
                 "Tucuman",
@@ -102,6 +102,72 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
         );
         paciente1.setHistoriaClinica(historia1);
         pacientes.add(paciente1);
+
+
+        HistoriaClinica historia2 = new HistoriaClinica();
+        historia2.setId(2L);
+
+        // Crear Diagnóstico y Evoluciones para el segundo paciente
+        Diagnostico diagnostico3 = new Diagnostico("Gripe común", "Dr. Ana López", "Medicina General");
+        diagnostico3.setId(3L); // Asignar ID único al diagnóstico
+
+        Evolucion evolucion4 = new Evolucion(
+                "Paciente presenta síntomas de gripe.",
+                LocalDateTime.now(),
+                "Dr. Ana López", // Nombre del médico
+                "Medicina General", // Especialidad
+                new PlantillaControl(70.0, 1.80, "110/70", 75, 97, null),
+                null, // Sin plantilla de laboratorio
+                new ArrayList<>() // Sin recetas al inicio
+        );
+        diagnostico3.agregarEvolucion(evolucion4);
+
+        historia2.getDiagnosticos().add(diagnostico3);
+
+        Diagnostico diagnostico4 = new Diagnostico("Bronquitis aguda", "Dr. Carlos Gómez", "Neumología");
+        diagnostico4.setId(4L); // Asignar ID único al diagnóstico
+
+        Evolucion evolucion5 = new Evolucion(
+                "Paciente con tos persistente y dificultad para respirar.",
+                LocalDateTime.now(),
+                "Dr. Carlos Gómez", // Mismo médico del diagnóstico
+                "Neumología", // Especialidad
+                new PlantillaControl(72.0, 1.75, "120/80", 80, 95, null), // Plantilla de control
+                null, // Sin plantilla de laboratorio
+                new ArrayList<>() // Sin recetas al inicio
+        );
+
+        Receta receta2 = new Receta(
+                LocalDateTime.now(),
+                Arrays.asList(
+                        new MedicamentoRecetado("Broncodilatador"),
+                        new MedicamentoRecetado("Antibiótico")
+                ),
+                "Dr. Carlos Gómez", // Médico
+                "Neumología" // Especialidad
+        );
+        evolucion5.getRecetas().add(receta2);
+        diagnostico4.agregarEvolucion(evolucion5);
+
+        historia2.getDiagnosticos().add(diagnostico4);
+
+        // Crear el segundo paciente con la Historia Clínica
+        Paciente paciente2 = new Paciente(
+                27450611323L,
+                450611323L,
+                "Ariadna Cisterna Diaco",
+                new Date(2003, 06, 10),
+                "3816532320",
+                "cisterna2728@gmail.com",
+                "Centenario 353",
+                "Tafi Viejo",
+                "Tucuman",
+                "Argentina",
+                "BF654321",
+                2L // Historia clínica ID
+        );
+        paciente2.setHistoriaClinica(historia2);
+        pacientes.add(paciente2);
     }
 
     @Override
