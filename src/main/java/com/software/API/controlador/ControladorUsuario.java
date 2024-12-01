@@ -19,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
@@ -45,15 +46,27 @@ public class ControladorUsuario {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody UsuarioInicioSesionDTO usuarioInicioSesionDTO, HttpServletRequest request, HttpServletResponse response) {
-        UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated(usuarioInicioSesionDTO.getEmail(), usuarioInicioSesionDTO.getContrasenia());
-        Authentication authenticationRequest = authenticationManager.authenticate(token);
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authenticationRequest);
-        SecurityContextHolder.setContext(context);
-        securityContextRepository.saveContext(context, request, response);
-        return ResponseEntity.ok().body("usuario autenticado");
+        try {
+            UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated(usuarioInicioSesionDTO.getEmail(), usuarioInicioSesionDTO.getContrasenia());
+            Authentication authenticationRequest = authenticationManager.authenticate(token);
+
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(authenticationRequest);
+            SecurityContextHolder.setContext(context);
+            securityContextRepository.saveContext(context, request, response);
+
+            return ResponseEntity.ok().body("Usuario autenticado");
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Credenciales incorrectas. Verifica tu email y contraseña.");
+        }
     }
 
+    @GetMapping
+    public ResponseEntity<String> obtenerUsuarioAutenticado(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails user = (UserDetails) auth.getPrincipal();
+        return ResponseEntity.ok().body(user.getUsername());
+    }
 
     @GetMapping("/buscar/{cuil}")
     public ResponseEntity<Usuario> buscarUsuario(@PathVariable Long cuil) {
