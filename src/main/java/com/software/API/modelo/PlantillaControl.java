@@ -24,6 +24,7 @@ public class PlantillaControl {
         this.pulso = (pulso != null && pulso >= 0) ? pulso : null;
         this.saturacion = (saturacion != null && saturacion >= 0) ? saturacion : null;
         this.nivelAzucar = (nivelAzucar != null && nivelAzucar >= 0) ? nivelAzucar : null;
+        this.id = System.currentTimeMillis();
     }
 }
 

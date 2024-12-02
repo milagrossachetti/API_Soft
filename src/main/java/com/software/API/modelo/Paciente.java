@@ -1,6 +1,5 @@
 package com.software.API.modelo;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.software.API.excepcion.HistoriaClinicaNoEncontradaException;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +22,7 @@ public class Paciente {
     private String pais;
     private String nroAfiliado;
     private Estado estado;
-    private Long obraSocialId;
+    private ObraSocial obraSocial;
     private HistoriaClinica historiaClinica; // Se gestiona manualmente, no por JPA.
 
     public Paciente() {}
@@ -45,7 +44,7 @@ public class Paciente {
         this.provincia = provincia;
         this.pais = pais;
         this.nroAfiliado = nroAfiliado;
-        this.obraSocialId = obraSocialId;
+        this.obraSocial = obraSocial;
         this.estado = Estado.ACTIVO;
     }
 
@@ -59,6 +58,14 @@ public class Paciente {
         }
         return this.historiaClinica;
     }
+
+    public String obtenerCodigoObraSocial() {
+        if (this.obraSocial == null || this.obraSocial.getCodigo() == null) {
+            throw new IllegalArgumentException("El paciente no tiene una obra social registrada o el código es nulo.");
+        }
+        return this.obraSocial.getCodigo();
+    }
+
 
     public void agregarDiagnostico(Diagnostico diagnostico) {
         if (diagnostico == null) {

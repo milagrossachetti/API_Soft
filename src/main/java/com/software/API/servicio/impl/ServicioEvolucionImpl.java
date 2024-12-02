@@ -4,31 +4,38 @@ import com.software.API.DTOs.*;
 import com.software.API.excepcion.*;
 import com.software.API.modelo.*;
 import com.software.API.repositorio.*;
-import com.software.API.repositorio.RepositorioAPISalud;
 import com.software.API.servicio.ServicioAPISalud;
+import com.software.API.servicio.ServicioEmail;
 import com.software.API.servicio.ServicioEvolucion;
+import jakarta.mail.MessagingException;
+import com.software.API.servicio.ServicioPDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Service
 public class ServicioEvolucionImpl implements ServicioEvolucion {
 
     private final RepositorioPaciente repositorioPaciente;
     private final ServicioAPISalud servicioAPISalud;
-    private final RepositorioAPISalud repositorioAPISalud;
+    private final ServicioPDF servicioPDF;
+    private final ServicioEmail servicioEmail;
+
 
 
     private static final Logger logger = LoggerFactory.getLogger(ServicioEvolucion.class);
 
-    public ServicioEvolucionImpl(RepositorioPaciente repositorioPaciente, ServicioAPISalud servicioAPISalud,RepositorioAPISalud repositorioAPISalud) {
+    public ServicioEvolucionImpl(
+            RepositorioPaciente repositorioPaciente,
+            ServicioAPISalud servicioAPISalud,
+            ServicioPDF servicioPDF,
+            ServicioEmail servicioEmail) {
         this.repositorioPaciente = repositorioPaciente;
         this.servicioAPISalud = servicioAPISalud;
-        this.repositorioAPISalud = repositorioAPISalud;
+        this.servicioPDF = servicioPDF;
+        this.servicioEmail = servicioEmail;
     }
 
     // Obtener evoluciones de un diagnóstico específico
@@ -56,6 +63,14 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
             throw new IllegalArgumentException("La evolución debe tener al menos texto, plantilla de control, plantilla de laboratorio o una receta.");
         }
 
+        // Validar que no tenga receta y plantilla de laboratorio juntas
+        if (evolucionDTO.getPlantillaLaboratorio() != null &&
+                evolucionDTO.getRecetas() != null &&
+                !evolucionDTO.getRecetas().isEmpty()) {
+            throw new IllegalArgumentException("La evolución no puede contener receta y plantilla de laboratorio al mismo tiempo.");
+        }
+
+        //Validar medico
         if (nombreMedico == null || nombreMedico.isEmpty() || especialidadMedico == null || especialidadMedico.isEmpty()) {
             throw new IllegalArgumentException("El nombre y la especialidad del médico son obligatorios.");
         }
@@ -122,7 +137,10 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
         }
 
         // Validar medicamentos con la API de salud
-        validarMedicamentos(nombresMedicamentos);
+        validarMedicamentosConApi(nombresMedicamentos, servicioAPISalud);
+
+        // Validar obra social del paciente con la API de salud
+        validarObraSocialConApi(paciente, servicioAPISalud);
 
         // Delegar la creación de la receta al flujo jerárquico desde paciente
         Receta receta = paciente.crearReceta(
@@ -148,21 +166,33 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
 
 
     // Validar medicamentos utilizando el ServicioAPISalud
-    private void validarMedicamentos(List<String> nombresMedicamentos) {
-        List<Medicamento> apiResult = repositorioAPISalud.obtenerMedicamentos();
-
-        // Lista de nombres válidos desde la API
-        List<String> nombresValidos = apiResult.stream()
-                .map(Medicamento::getNombre)
-                .collect(Collectors.toList());
-
-        // Validar que todos los medicamentos ingresados estén en la lista válida
+    private void validarMedicamentosConApi(List<String> nombresMedicamentos, ServicioAPISalud servicioAPISalud) {
         for (String nombre : nombresMedicamentos) {
-            if (!nombresValidos.contains(nombre)) {
-                throw new MedicamentoInvalidoException("El medicamento " + nombre + " no es válido.");
+            List<Medicamento> medicamentosEncontrados = servicioAPISalud.obtenerMedicamentosPorDescripcion(nombre);
+            if (medicamentosEncontrados.isEmpty()) {
+                throw new RecetaInvalidaException("El medicamento '" + nombre + "' no está disponible en la base de datos de la API de salud.");
             }
         }
     }
+
+    private void validarObraSocialConApi(Paciente paciente, ServicioAPISalud servicioAPISalud) {
+        try {
+            // Obtener el código de la obra social a través del método encapsulado
+            String codigoObraSocial = paciente.obtenerCodigoObraSocial();
+
+            // Validar que la obra social exista en la API externa
+            ObraSocial obraSocialApi = servicioAPISalud.obtenerObraSocialPorCodigo(codigoObraSocial);
+            if (obraSocialApi == null) {
+                throw new RecetaInvalidaException("La obra social con código '" + codigoObraSocial + "' no está registrada en la base de datos de la API de salud.");
+            }
+        } catch (IllegalArgumentException e) {
+            // Excepción manejada desde obtenerCodigoObraSocial
+            throw new RecetaInvalidaException(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al validar la obra social en la API de salud: " + e.getMessage(), e);
+        }
+    }
+
 
     private PlantillaControl convertirPlantillaControlDTO(PlantillaControlDTO dto) {
         if (dto == null) return null;
@@ -173,5 +203,22 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
         if (dto == null) return null;
         return new PlantillaLaboratorio(dto.getTiposEstudios(), dto.getItems());
     }
+
+
+    @Override
+    public byte[] generarPDFReceta(Long numeroReceta, List<String> medicamentos, String nombrePaciente, String nombreMedico, String especialidadMedico) {
+        return servicioPDF.generarPDFReceta(numeroReceta, medicamentos, nombrePaciente, nombreMedico, especialidadMedico);
+    }
+
+    @Override
+    public byte[] generarPDFLaboratorio(String nombrePaciente, String nombreMedico, String especialidadMedico, List<String> tiposEstudios, List<String> items) {
+        return servicioPDF.generarPDFLaboratorio(nombrePaciente, nombreMedico, especialidadMedico, tiposEstudios, items);
+    }
+
+    @Override
+    public void enviarEmailConAdjunto(String destinatario, String asunto, String cuerpo, byte[] adjunto, String nombreAdjunto) throws MessagingException {
+        servicioEmail.enviarEmailConAdjunto(destinatario, asunto, cuerpo, adjunto, nombreAdjunto);
+    }
+
 
 }
