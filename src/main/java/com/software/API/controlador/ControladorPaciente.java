@@ -8,12 +8,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/paciente")
 public class ControladorPaciente {
 
     @Autowired
     ServicioPaciente servicioPaciente;
+
+    @GetMapping()
+    public ResponseEntity<List<Paciente>> buscarPaciente(@RequestParam Long cuil) {
+        List<Paciente> pacientes = servicioPaciente.buscarPacientesPorCuilParcial(cuil);
+        if (pacientes.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } return ResponseEntity.ok().body(pacientes);
+    }
+
 
     @GetMapping("/buscar/{cuil}")
     public ResponseEntity<Paciente> verificarPaciente(@PathVariable Long cuil) {

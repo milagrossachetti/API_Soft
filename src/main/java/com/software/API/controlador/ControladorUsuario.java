@@ -27,6 +27,9 @@ import com.software.API.modelo.Usuario;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/usuario")
 @AllArgsConstructor
@@ -62,10 +65,12 @@ public class ControladorUsuario {
     }
 
     @GetMapping
-    public ResponseEntity<String> obtenerUsuarioAutenticado(){
+    public ResponseEntity<Map<String, String>> obtenerUsuarioAutenticado(){
+        Map<String, String> response = new HashMap<>();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetails user = (UserDetails) auth.getPrincipal();
-        return ResponseEntity.ok().body(user.getUsername());
+        response.put("email", user.getUsername());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/buscar/{cuil}")

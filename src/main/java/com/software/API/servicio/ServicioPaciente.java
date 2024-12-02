@@ -3,6 +3,9 @@ package com.software.API.servicio;
 import com.software.API.modelo.Paciente;
 import com.software.API.modelo.HistoriaClinica;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface ServicioPaciente {
 
     /**
@@ -30,4 +33,5 @@ public interface ServicioPaciente {
      * @throws IllegalStateException Si el paciente no tiene una historia clínica asociada.
      */
     HistoriaClinica obtenerHistoriaClinica(Long cuil);
+    List<Paciente> buscarPacientesPorCuilParcial(Long cuil);
 }

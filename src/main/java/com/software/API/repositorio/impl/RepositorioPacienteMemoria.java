@@ -25,7 +25,6 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
         // Crear Diagnóstico y Evoluciones
         Diagnostico diagnostico1 = new Diagnostico("Fiebre tifoidea", "Dr. Juan Pérez", "Cardiología");
         diagnostico1.setId(1L); // Asignar ID único al diagnóstico
-
         Evolucion evolucion1 = new Evolucion(
                 "Paciente presenta fiebre persistente.",
                 LocalDateTime.now(),
@@ -101,7 +100,56 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                 1L // Historia clínica ID
         );
         paciente1.setHistoriaClinica(historia1);
+
+        //----otro paciente
+
+        // Crear Historia Clínica y Diagnóstico
+        HistoriaClinica historia2 = new HistoriaClinica();
+        historia2.setId(2L);
+
+        Diagnostico diagnostico3 = new Diagnostico("Faringitis", "Dr. Juan Pérez", "Otorrinolaringologo");
+        diagnostico3.setId(3L); // Asignar ID único al diagnóstico
+
+        Evolucion evolucion4 = new Evolucion(
+                "Fiebre, dolor de garganta y dificultad para tragar",
+                LocalDateTime.now(),
+                "Dr. Juan Pérez",
+                "Otorrinolaringología", // Especialidad
+                null, // Sin plantilla de control
+                null, // Sin plantilla de laboratorio
+                Arrays.asList(new Receta(
+                        LocalDateTime.now(),
+                        Arrays.asList(
+                                new MedicamentoRecetado("Paracetamol"),
+                                new MedicamentoRecetado("Ibuprofeno")
+                        ),
+                        "Dr. Juan Pérez", // Médico
+                        "Otorrinolaringología" // Especialidad
+                ))
+        );
+        diagnostico3.agregarEvolucion(evolucion4);
+
+        historia2.getDiagnosticos().add(diagnostico3);
+
+        // Crear Paciente con la Historia Clínica
+        Paciente paciente2 = new Paciente(
+                20394538717L,
+                44965125L,
+                "Milagros Sachetti",
+                new Date(02, 8, 28),
+                "3865348167",
+                "milagrossachetti@gmail.com",
+                "Balcarce 400",
+                "San Miguel de Tucuman",
+                "Tucuman",
+                "Argentina",
+                "AG568142",
+                2L // Historia clínica ID
+        );
+        paciente2.setHistoriaClinica(historia2);
+
         pacientes.add(paciente1);
+        pacientes.add(paciente2);
     }
 
     @Override
@@ -133,5 +181,9 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                         existente.getHistoriaClinica().setDiagnosticos(diagnosticosExistentes);
                     }
                 });
+    }
+
+    public List<Paciente> getPacientes() {
+        return pacientes;
     }
 }
