@@ -12,7 +12,9 @@ import com.software.API.excepcion.*;
 import com.software.API.modelo.*;
 import com.software.API.repositorio.*;
 import com.software.API.servicio.ServicioAPISalud;
+import com.software.API.servicio.ServicioEmail;
 import com.software.API.servicio.ServicioEvolucion;
+import com.software.API.servicio.ServicioPDF;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.util.ByteArrayDataSource;
@@ -33,13 +35,17 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
     private final RepositorioPaciente repositorioPaciente;
     private final ServicioAPISalud servicioAPISalud;
     private final JavaMailSender mailSender;
+    private final ServicioPDF servicioPDF;
+    private final ServicioEmail servicioEmail;
 
     private static final Logger logger = LoggerFactory.getLogger(ServicioEvolucion.class);
 
-    public ServicioEvolucionImpl(RepositorioPaciente repositorioPaciente, ServicioAPISalud servicioAPISalud, JavaMailSender mailSender) {
+    public ServicioEvolucionImpl(RepositorioPaciente repositorioPaciente, ServicioAPISalud servicioAPISalud, JavaMailSender mailSender, ServicioPDF servicioPDF, ServicioEmail servicioEmail) {
         this.repositorioPaciente = repositorioPaciente;
         this.servicioAPISalud = servicioAPISalud;
         this.mailSender = mailSender;
+        this.servicioPDF = servicioPDF;
+        this.servicioEmail = servicioEmail;
     }
 
     // Obtener evoluciones de un diagnóstico específico
@@ -61,8 +67,6 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
         if (paciente == null) {
             throw new PacienteNoEncontradoException("Paciente no encontrado con CUIL: " + cuilPaciente);
         }
-
-        validarObraSocial(paciente.getObraSocial().getCodigo());
 
         // Validar que al menos uno de los campos esté presente
         boolean tieneContenido = (evolucionDTO.getTexto() != null && !evolucionDTO.getTexto().isEmpty()) ||
@@ -103,10 +107,6 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                     throw new IllegalArgumentException("Las recetas deben contener al menos un medicamento.");
                 }
 
-                for (String medicamento : medicamentos) {
-                    validarMedicamentoPorNombre(medicamento);  // Verificar si el medicamento es válido
-                }
-
                 Receta receta = crearReceta(
                         medicamentos,
                         diagnosticoId,
@@ -119,7 +119,7 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                 // Generar PDF de la receta
                 byte[] pdfReceta = generarPDFReceta(receta.getId(), medicamentos, paciente.getNombreCompleto(), nombreMedico, especialidadMedico);
                 try {
-                    enviarEmailConAdjunto("cisterna2728@gmail.com", "Receta Médica", "Adjunto encontrarás la receta médica.", pdfReceta, "receta.pdf");
+                    enviarEmailConAdjunto(paciente.getEmail(), "Receta Médica", "Adjunto encontrarás la receta médica.", pdfReceta, "receta.pdf");
                 } catch (MessagingException e) {
                     logger.error("Error al enviar el correo: ", e);
                 }
@@ -153,11 +153,11 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
             throw new RecetaInvalidaException("Solo se permiten hasta 2 medicamentos por receta.");
         }
 
-        validarObraSocial(paciente.getObraSocial().getCodigo());
+        // Validar medicamentos con la API de salud
+        validarMedicamentosConApi(nombresMedicamentos, servicioAPISalud);
 
-        for (String medicamento : nombresMedicamentos) {
-            validarMedicamentoPorNombre(medicamento);  // Verificar si el medicamento es válido
-        }
+        // Validar obra social del paciente con la API de salud
+        validarObraSocialConApi(paciente, servicioAPISalud);
 
         // Delegar la creación de la receta al flujo jerárquico desde paciente
         Receta receta = paciente.crearReceta(
@@ -174,10 +174,37 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
         return receta;
     }
 
-
     private Paciente obtenerPacientePorCuil(Long cuil) {
         return repositorioPaciente.buscarPorCuil(cuil)
                 .orElseThrow(() -> new PacienteNoEncontradoException("Paciente no encontrado con CUIL: " + cuil));
+    }
+
+    // Validar medicamentos utilizando el ServicioAPISalud
+    private void validarMedicamentosConApi(List<String> nombresMedicamentos, ServicioAPISalud servicioAPISalud) {
+        for (String nombre : nombresMedicamentos) {
+            List<Medicamento> medicamentosEncontrados = servicioAPISalud.obtenerMedicamentosPorDescripcion(nombre);
+            if (medicamentosEncontrados.isEmpty()) {
+                throw new RecetaInvalidaException("El medicamento '" + nombre + "' no está disponible en la base de datos de la API de salud.");
+            }
+        }
+    }
+
+    private void validarObraSocialConApi(Paciente paciente, ServicioAPISalud servicioAPISalud) {
+        try {
+            // Obtener el código de la obra social a través del método encapsulado
+            String codigoObraSocial = paciente.obtenerCodigoObraSocial();
+
+            // Validar que la obra social exista en la API externa
+            ObraSocial obraSocialApi = servicioAPISalud.obtenerObraSocialPorCodigo(codigoObraSocial);
+            if (obraSocialApi == null) {
+                throw new RecetaInvalidaException("La obra social con código '" + codigoObraSocial + "' no está registrada en la base de datos de la API de salud.");
+            }
+        } catch (IllegalArgumentException e) {
+            // Excepción manejada desde obtenerCodigoObraSocial
+            throw new RecetaInvalidaException(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al validar la obra social en la API de salud: " + e.getMessage(), e);
+        }
     }
 
     private PlantillaControl convertirPlantillaControlDTO(PlantillaControlDTO dto) {
@@ -216,97 +243,17 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
     }
 
     @Override
-    public byte[] generarPDFReceta(Long numeroReceta, @NotNull List<String> medicamentos, String nombrePaciente, String nombreMedico, String especialidadMedico) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        PdfWriter writer = new PdfWriter(baos);
-        com.itextpdf.kernel.pdf.PdfDocument pdfDoc = new com.itextpdf.kernel.pdf.PdfDocument(writer);
-        Document document = new Document(pdfDoc);
-
-        document.add(new Paragraph("Nombre de la Empresa."));
-        document.add(new Paragraph("CABRERA 3314, Palermo, Ciudad de Buenos Aires\nTel: 115273400"));
-
-        LineSeparator ls = new LineSeparator(new SolidLine());
-        ls.setWidth(UnitValue.createPercentValue(100));
-        document.add(new Paragraph("\n")).add(ls).add(new Paragraph("\n"));
-
-        document.add(new Paragraph("\nFecha Receta: " + LocalDate.now())
-                .setTextAlignment(TextAlignment.CENTER));
-        document.add(new Paragraph("Receta N°: " + numeroReceta)
-                .setTextAlignment(TextAlignment.CENTER));
-
-        document.add(new Paragraph("\nBeneficiario: " + nombrePaciente));
-        document.add(new Paragraph("Cobertura: "));
-        document.add(new Paragraph("N° Afiliado: " ));
-        document.add(new Paragraph("\nRp/").setFontSize(12).setMarginTop(10).setBold());
-        for (String medicamento : medicamentos) {
-            document.add(new Paragraph(medicamento)
-                    .setTextAlignment(TextAlignment.CENTER));
-        }
-        document.add(new Paragraph("\nFirmado electrónicamente por:").setBold());
-        document.add(new Paragraph("Dra./Dr. " + nombreMedico));
-        document.add(new Paragraph("Matrícula: "));
-        document.add(new Paragraph("Especialidad: " + especialidadMedico));
-
-        document.close();
-
-        return baos.toByteArray();
+    public byte[] generarPDFReceta(Long numeroReceta, List<String> medicamentos, String nombrePaciente, String nombreMedico, String especialidadMedico) {
+        return servicioPDF.generarPDFReceta(numeroReceta, medicamentos, nombrePaciente, nombreMedico, especialidadMedico);
     }
 
     @Override
     public byte[] generarPDFLaboratorio(String nombrePaciente, String nombreMedico, String especialidadMedico, List<String> tiposEstudios, List<String> items) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PdfWriter writer = new PdfWriter(baos);
-        com.itextpdf.kernel.pdf.PdfDocument pdfDoc = new com.itextpdf.kernel.pdf.PdfDocument(writer);
-        Document document = new Document(pdfDoc);
-
-        document.add(new Paragraph("Nombre de la Empresa."));
-        document.add(new Paragraph("CABRERA 3314, Palermo, Ciudad de Buenos Aires\nTel: 115273400"));
-
-        LineSeparator ls = new LineSeparator(new SolidLine());
-        ls.setWidth(UnitValue.createPercentValue(100));
-        document.add(new Paragraph("\n")).add(ls).add(new Paragraph("\n"));
-
-        document.add(new Paragraph("\nFecha: " + LocalDate.now())
-                .setTextAlignment(TextAlignment.CENTER));
-        document.add(new Paragraph("Pedido de Laboratorio")
-                .setTextAlignment(TextAlignment.CENTER));
-
-        document.add(new Paragraph("\nBeneficiario: " + nombrePaciente));
-        document.add(new Paragraph("Cobertura: "));
-        document.add(new Paragraph("N° Afiliado: "));
-
-        document.add(new Paragraph("\nEstudios Solicitados:").setFontSize(12).setMarginTop(10).setBold());
-        for (String estudio : tiposEstudios) {
-            document.add(new Paragraph(estudio)
-                    .setTextAlignment(TextAlignment.CENTER));
-        }
-
-        document.add(new Paragraph("\nItems:").setFontSize(12).setMarginTop(10).setBold());
-        for (String item : items) {
-            document.add(new Paragraph(item)
-                    .setTextAlignment(TextAlignment.CENTER));
-        }
-
-        document.add(new Paragraph("\nFirmado electrónicamente por:").setBold());
-        document.add(new Paragraph("Dra./Dr. " + nombreMedico));
-        document.add(new Paragraph("Matrícula: "));
-        document.add(new Paragraph("Especialidad: " + especialidadMedico));
-
-        document.close();
-
-        return baos.toByteArray();
+        return servicioPDF.generarPDFLaboratorio(nombrePaciente, nombreMedico, especialidadMedico, tiposEstudios, items);
     }
 
+    @Override
     public void enviarEmailConAdjunto(String destinatario, String asunto, String cuerpo, byte[] adjunto, String nombreAdjunto) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-        helper.setTo(destinatario);
-        helper.setSubject(asunto);
-        helper.setText(cuerpo);
-        helper.addAttachment(nombreAdjunto, new ByteArrayDataSource(adjunto, "application/pdf"));
-
-        mailSender.send(message);
+        servicioEmail.enviarEmailConAdjunto(destinatario, asunto, cuerpo, adjunto, nombreAdjunto);
     }
 }
