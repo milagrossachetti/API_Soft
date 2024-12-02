@@ -1,12 +1,5 @@
 package com.software.API.servicio.impl;
 
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.LineSeparator;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.property.TextAlignment;
-import com.itextpdf.layout.property.UnitValue;
 import com.software.API.DTOs.*;
 import com.software.API.excepcion.*;
 import com.software.API.modelo.*;
@@ -16,17 +9,11 @@ import com.software.API.servicio.ServicioEmail;
 import com.software.API.servicio.ServicioEvolucion;
 import com.software.API.servicio.ServicioPDF;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.util.ByteArrayDataSource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -117,7 +104,7 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                 );
 
                 // Generar PDF de la receta
-                byte[] pdfReceta = generarPDFReceta(receta.getId(), medicamentos, paciente.getNombreCompleto(), nombreMedico, especialidadMedico);
+                byte[] pdfReceta = generarPDFReceta(receta.getId(), medicamentos, paciente.getNombreCompleto(), nombreMedico, especialidadMedico, paciente.obtenerNombreObraSocial(), paciente.getNroAfiliado());
                 try {
                     enviarEmailConAdjunto(paciente.getEmail(), "Receta Médica", "Adjunto encontrarás la receta médica.", pdfReceta, "receta.pdf");
                 } catch (MessagingException e) {
@@ -125,9 +112,9 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
                 }
             }
         } else if (evolucionDTO.getPlantillaLaboratorio() != null) {
-            byte[] pdfLaboratorio = generarPDFLaboratorio(paciente.getNombreCompleto(), nombreMedico, especialidadMedico, evolucionDTO.getPlantillaLaboratorio().getTiposEstudios(),  evolucionDTO.getPlantillaLaboratorio().getItems());
+            byte[] pdfLaboratorio = generarPDFLaboratorio(paciente.getNombreCompleto(), nombreMedico, especialidadMedico, evolucionDTO.getPlantillaLaboratorio().getTiposEstudios(), evolucionDTO.getPlantillaLaboratorio().getItems(), paciente.obtenerNombreObraSocial(), paciente.getNroAfiliado());
             try {
-                enviarEmailConAdjunto("cisterna2728@gmail.com", "Pedido de Laboratorio", "Adjunto encontrarás el pedido de laboratorio.", pdfLaboratorio, "laboratorio.pdf");
+                enviarEmailConAdjunto(paciente.getEmail(), "Pedido de Laboratorio", "Adjunto encontrarás el pedido de laboratorio.", pdfLaboratorio, "laboratorio.pdf");
             } catch (MessagingException e) {
                 logger.error("Error al enviar el correo: ", e);
             }
@@ -243,13 +230,13 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
     }
 
     @Override
-    public byte[] generarPDFReceta(Long numeroReceta, List<String> medicamentos, String nombrePaciente, String nombreMedico, String especialidadMedico) {
-        return servicioPDF.generarPDFReceta(numeroReceta, medicamentos, nombrePaciente, nombreMedico, especialidadMedico);
+    public byte[] generarPDFReceta(Long numeroReceta, List<String> medicamentos, String nombrePaciente, String nombreMedico, String especialidadMedico, String obraSocial, String nroAfiliado){
+        return servicioPDF.generarPDFReceta(numeroReceta, medicamentos, nombrePaciente, nombreMedico, especialidadMedico, obraSocial, nroAfiliado);
     }
 
     @Override
-    public byte[] generarPDFLaboratorio(String nombrePaciente, String nombreMedico, String especialidadMedico, List<String> tiposEstudios, List<String> items) {
-        return servicioPDF.generarPDFLaboratorio(nombrePaciente, nombreMedico, especialidadMedico, tiposEstudios, items);
+    public byte[] generarPDFLaboratorio(String nombrePaciente, String nombreMedico, String especialidadMedico, List<String> tiposEstudios, List<String> items, String obraSocial, String nroAfiliado) {
+        return servicioPDF.generarPDFLaboratorio(nombrePaciente, nombreMedico, especialidadMedico, tiposEstudios, items,obraSocial, nroAfiliado);
     }
 
     @Override

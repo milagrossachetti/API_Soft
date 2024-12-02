@@ -45,14 +45,16 @@ public interface ServicioEvolucion {
     /**
      * Genera un PDF para una receta médica.
      *
-     * @param numeroReceta Número de la receta.
-     * @param medicamentos Lista de medicamentos incluidos en la receta.
-     * @param nombrePaciente Nombre del paciente.
-     * @param nombreMedico Nombre del médico.
+     * @param numeroReceta       Número de la receta.
+     * @param medicamentos       Lista de medicamentos incluidos en la receta.
+     * @param nombrePaciente     Nombre del paciente.
+     * @param nombreMedico       Nombre del médico.
      * @param especialidadMedico Especialidad del médico.
+     * @param obraSocial
+     * @param nroAfiliado
      * @return Un array de bytes que representa el PDF generado.
      */
-    byte[] generarPDFReceta(Long numeroReceta, List<String> medicamentos, String nombrePaciente, String nombreMedico, String especialidadMedico);
+    byte[] generarPDFReceta(Long numeroReceta, List<String> medicamentos, String nombrePaciente, String nombreMedico, String especialidadMedico, String obraSocial, String nroAfiliado);
 
 
     /**
@@ -63,9 +65,11 @@ public interface ServicioEvolucion {
      * @param especialidadMedico Especialidad del médico.
      * @param tiposEstudios Lista de tipos de estudios solicitados.
      * @param items Lista de ítems solicitados.
+     *  @param obraSocial
+     * @param nroAfiliado
      * @return Un array de bytes que representa el PDF generado.
      */
-    byte[] generarPDFLaboratorio(String nombrePaciente, String nombreMedico, String especialidadMedico, List<String> tiposEstudios, List<String> items);
+    byte[] generarPDFLaboratorio(String nombrePaciente, String nombreMedico, String especialidadMedico, List<String> tiposEstudios, List<String> items, String obraSocial, String nroAfiliado);
 
     /**
      * Envía un correo electrónico con un archivo adjunto.

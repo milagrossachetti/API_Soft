@@ -67,6 +67,13 @@ public class Paciente {
         return this.obraSocial.getCodigo();
     }
 
+    public String obtenerNombreObraSocial() {
+        if (this.obraSocial == null || this.obraSocial.getDenominacion() == null){
+            throw new IllegalArgumentException("El paciente no tiene una obra social registrada o el nombre es nulo.");
+        }
+        return this.obraSocial.getDenominacion();
+    }
+
     public void agregarDiagnostico(Diagnostico diagnostico) {
         if (diagnostico == null) {
             throw new IllegalArgumentException("El diagnóstico no puede ser nulo.");
