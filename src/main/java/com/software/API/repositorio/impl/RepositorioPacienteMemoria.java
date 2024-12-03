@@ -204,7 +204,7 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                 27450611323L,
                 450611323L,
                 "Ariadna Cisterna Diaco",
-                new Date(2003, 06, 10),
+                new Date(03, 06, 10),
                 "3816532320",
                 "cisterna2728@gmail.com",
                 "Centenario 353",
@@ -247,5 +247,8 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                         existente.getHistoriaClinica().setDiagnosticos(diagnosticosExistentes);
                     }
                 });
+    }
+    public List<Paciente> getPacientes() {
+        return pacientes;
     }
 }

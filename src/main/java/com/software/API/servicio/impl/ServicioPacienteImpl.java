@@ -3,19 +3,24 @@ package com.software.API.servicio.impl;
 import com.software.API.modelo.Paciente;
 import com.software.API.modelo.HistoriaClinica;
 import com.software.API.repositorio.RepositorioPaciente;
+import com.software.API.repositorio.impl.RepositorioPacienteMemoria;
 import com.software.API.servicio.ServicioPaciente;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ServicioPacienteImpl implements ServicioPaciente {
 
     private final RepositorioPaciente repositorioPaciente;
+    private final RepositorioPacienteMemoria repositorioPacienteMemoria;
 
     // Constructor con inyección de dependencias
-    public ServicioPacienteImpl(RepositorioPaciente repositorioPaciente) {
+    public ServicioPacienteImpl(RepositorioPaciente repositorioPaciente, RepositorioPacienteMemoria repositorioPacienteMemoria) {
         this.repositorioPaciente = repositorioPaciente;
+        this.repositorioPacienteMemoria = repositorioPacienteMemoria;
     }
 
     // Obtener un paciente por CUIL
@@ -41,6 +46,14 @@ public class ServicioPacienteImpl implements ServicioPaciente {
         Paciente paciente = obtenerPacientePorCuil(cuil);
         return Optional.ofNullable(paciente.getHistoriaClinica())
                 .orElseThrow(() -> new IllegalStateException("El paciente con CUIL " + cuil + " no tiene una historia clínica asociada."));
+    }
+
+    @Override
+    public List<Paciente> buscarPacientesPorCuilParcial(Long cuil) {
+        List<Paciente> pacientes = repositorioPacienteMemoria.getPacientes();
+        return pacientes.stream()
+                .filter(paciente -> String.valueOf(paciente.getCuil()).contains(String.valueOf(cuil)))
+                .collect(Collectors.toList());
     }
 }
 
