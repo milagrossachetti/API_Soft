@@ -36,10 +36,13 @@ import java.util.Optional;
 public class ServicioUsuarioImpl implements ServicioUsuario {
     @Autowired
     RepositorioUsuario repositorioUsuario;
+
     @Autowired
     RepositorioRol repositorioRol;
+
     @Autowired
     PasswordEncoder passwordEncoder;
+
     @Autowired
     ServicioAPISalud servicioAPISalud;
 
@@ -50,8 +53,10 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
             throw new ElUsuarioYaExisteException("El usuario ya existe en el sistema, corrobore su email o cuil.");
         }
         String rolNombre = (usuarioDTO.getEspecialidad() == null && usuarioDTO.getMatricula() == null) ? "RECEPCIONISTA" : "MEDICO";
+
         Rol rol = repositorioRol.findByNombre(rolNombre)
                 .orElseThrow(() -> new RuntimeException("Rol '" + rolNombre + "' no encontrado"));
+
         Usuario usuario = new Usuario(usuarioDTO.getCuil(),
                 usuarioDTO.getEmail(),
                 passwordEncoder.encode(usuarioDTO.getContrasenia()),
@@ -66,7 +71,8 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
                 usuarioDTO.getProvincia(),
                 usuarioDTO.getPais());
         repositorioUsuario.save(usuario);
-        return usuario;
+
+         return usuario;
     }
 
 

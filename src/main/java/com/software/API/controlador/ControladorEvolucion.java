@@ -1,30 +1,24 @@
 package com.software.API.controlador;
 
-import com.software.API.DTOs.DiagnosticoDTO;
 import com.software.API.DTOs.EvolucionDTO;
+import com.software.API.DTOs.RecetaDTO;
 import com.software.API.excepcion.DiagnosticoNoEncontradoException;
 import com.software.API.excepcion.PacienteNoEncontradoException;
-import com.software.API.modelo.Diagnostico;
 import com.software.API.modelo.Evolucion;
 import com.software.API.servicio.ServicioUsuario;
-import com.software.API.repositorio.RepositorioUsuario;
-import com.software.API.servicio.ServicioDiagnostico;
 import com.software.API.servicio.ServicioEvolucion;
 
-
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -60,7 +54,14 @@ public class ControladorEvolucion {
                     (evolucionDTO.getRecetas() != null && !evolucionDTO.getRecetas().isEmpty());
 
             if (!tieneContenido) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La evolución debe tener al menos texto, plantilla de control, plantilla de laboratorio o una receta.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La evolución debe tener al menos texto, plantilla de control, plantilla de laboratorio o receta.");
+            }
+
+            boolean tieneRecetaYLaboratorio = (evolucionDTO.getPlantillaLaboratorio() != null &&
+                    (evolucionDTO.getRecetas() != null && !evolucionDTO.getRecetas().isEmpty()));
+
+            if(tieneRecetaYLaboratorio){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La evolucion no puede tener receta y plantilla de laboratorio al mismo tiempo.");
             }
 
             // Obtener datos del médico autenticado

@@ -32,4 +32,3 @@ public class ServicioEmailImpl implements ServicioEmail {
         mailSender.send(message);
     }
 }
-

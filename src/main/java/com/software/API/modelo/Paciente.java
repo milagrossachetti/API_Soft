@@ -1,5 +1,6 @@
 package com.software.API.modelo;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.software.API.excepcion.HistoriaClinicaNoEncontradaException;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +30,7 @@ public class Paciente {
 
     public Paciente(Long cuil, Long dni, String nombreCompleto, Date fechaNacimiento, String numeroTelefono,
                     String email, String direccion, String localidad, String provincia, String pais,
-                    String nroAfiliado, Long obraSocialId) {
+                    String nroAfiliado, ObraSocial obraSocial) {
         if (cuil == null || nombreCompleto == null || fechaNacimiento == null) {
             throw new IllegalArgumentException("CUIL, nombre completo y fecha de nacimiento son obligatorios.");
         }
@@ -66,6 +67,12 @@ public class Paciente {
         return this.obraSocial.getCodigo();
     }
 
+    public String obtenerNombreObraSocial() {
+        if (this.obraSocial == null || this.obraSocial.getDenominacion() == null){
+            throw new IllegalArgumentException("El paciente no tiene una obra social registrada o el nombre es nulo.");
+        }
+        return this.obraSocial.getDenominacion();
+    }
 
     public void agregarDiagnostico(Diagnostico diagnostico) {
         if (diagnostico == null) {

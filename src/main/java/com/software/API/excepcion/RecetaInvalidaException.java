@@ -8,4 +8,5 @@ public class RecetaInvalidaException extends RuntimeException {
     public RecetaInvalidaException(String message, Throwable cause) {
         super(message, cause);
     }
+
 }
