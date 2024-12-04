@@ -25,6 +25,7 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
         // Crear Diagnóstico y Evoluciones
         Diagnostico diagnostico1 = new Diagnostico("Fiebre tifoidea", "Dr. Juan Pérez", "Cardiología");
         diagnostico1.setId(1L); // Asignar ID único al diagnóstico
+
         Evolucion evolucion1 = new Evolucion(
                 "Paciente presenta fiebre persistente.",
                 LocalDateTime.now(),
@@ -97,13 +98,13 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                 "Tucuman",
                 "Argentina",
                 "AF123456",
-                1L // Historia clínica ID
+                new ObraSocial("128409", "OBRA SOCIAL DEL SINDICATO OBREROS Y EMPLEADOS DE EMPRESAS DE LIMPIEZA,SERVICIOS Y AFINES DE CORDOBA", "OSSOELSAC") // Historia clínica ID
         );
         paciente1.setHistoriaClinica(historia1);
+        pacientes.add(paciente1);
 
         //----otro paciente
 
-        // Crear Historia Clínica y Diagnóstico
         HistoriaClinica historia2 = new HistoriaClinica();
         historia2.setId(2L);
 
@@ -144,12 +145,77 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                 "Tucuman",
                 "Argentina",
                 "AG568142",
-                2L // Historia clínica ID
+                new ObraSocial("111506","OBRA SOCIAL ASOCIACION PROFESIONAL DE CAPITANES Y BAQUEANOS FLUVIALES Y PERSONAL CON  CONOCIMIENTO DE ZONA DE LA MARINA MERCANTE","OSCAPBAQFLU") // Historia clínica ID
         );
         paciente2.setHistoriaClinica(historia2);
-
-        pacientes.add(paciente1);
         pacientes.add(paciente2);
+
+        //----otro paciente
+
+        HistoriaClinica historia3 = new HistoriaClinica();
+        historia3.setId(3L);
+
+        // Crear Diagnóstico y Evoluciones para el segundo paciente
+        Diagnostico diagnostico4 = new Diagnostico("Gripe común", "Dr. Ana López", "Medicina General");
+        diagnostico3.setId(4L); // Asignar ID único al diagnóstico
+
+        Evolucion evolucion5 = new Evolucion(
+                "Paciente presenta síntomas de gripe.",
+                LocalDateTime.now(),
+                "Dr. Ana López", // Nombre del médico
+                "Medicina General", // Especialidad
+                new PlantillaControl(70.0, 1.80, "110/70", 75, 97, null),
+                null, // Sin plantilla de laboratorio
+                new ArrayList<>() // Sin recetas al inicio
+        );
+        diagnostico3.agregarEvolucion(evolucion4);
+
+        historia3.getDiagnosticos().add(diagnostico3);
+
+        Diagnostico diagnostico6 = new Diagnostico("Bronquitis aguda", "Dr. Carlos Gómez", "Neumología");
+        diagnostico4.setId(4L); // Asignar ID único al diagnóstico
+
+        Evolucion evolucion8 = new Evolucion(
+                "Paciente con tos persistente y dificultad para respirar.",
+                LocalDateTime.now(),
+                "Dr. Carlos Gómez", // Mismo médico del diagnóstico
+                "Neumología", // Especialidad
+                new PlantillaControl(72.0, 1.75, "120/80", 80, 95, null), // Plantilla de control
+                null, // Sin plantilla de laboratorio
+                new ArrayList<>() // Sin recetas al inicio
+        );
+
+        Receta receta2 = new Receta(
+                LocalDateTime.now(),
+                Arrays.asList(
+                        new MedicamentoRecetado("Broncodilatador"),
+                        new MedicamentoRecetado("Antibiótico")
+                ),
+                "Dr. Carlos Gómez", // Médico
+                "Neumología" // Especialidad
+        );
+        evolucion5.getRecetas().add(receta2);
+        diagnostico4.agregarEvolucion(evolucion5);
+
+        historia3.getDiagnosticos().add(diagnostico4);
+
+        // Crear el segundo paciente con la Historia Clínica
+        Paciente paciente3 = new Paciente(
+                27450611323L,
+                450611323L,
+                "Ariadna Cisterna Diaco",
+                new Date(03, 06, 10),
+                "3816532320",
+                "cisterna2728@gmail.com",
+                "Centenario 353",
+                "Tafi Viejo",
+                "Tucuman",
+                "Argentina",
+                "BF654321",
+                new ObraSocial("", "OBRA SOCIAL FEDERAL DE LA FEDERACION NACIONAL DE TRABAJADORES DE OBRAS SANITARIAS", "OSFFENTOS") // Historia clínica ID
+        );
+        paciente3.setHistoriaClinica(historia3);
+        pacientes.add(paciente3);
     }
 
     @Override
@@ -182,7 +248,6 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                     }
                 });
     }
-
     public List<Paciente> getPacientes() {
         return pacientes;
     }

@@ -1,7 +1,5 @@
 package com.software.API.servicio.impl;
 
-
-
 import com.software.API.modelo.Paciente;
 import com.software.API.modelo.HistoriaClinica;
 import com.software.API.repositorio.RepositorioPaciente;
@@ -31,7 +29,6 @@ public class ServicioPacienteImpl implements ServicioPaciente {
         return repositorioPaciente.buscarPorCuil(cuil)
                 .orElseThrow(() -> new IllegalArgumentException("Paciente con CUIL " + cuil + " no encontrado."));
     }
-
 
     // Actualizar la historia clínica completa de un paciente
     @Override

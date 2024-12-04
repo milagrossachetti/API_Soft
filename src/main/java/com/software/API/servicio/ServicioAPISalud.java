@@ -1,33 +1,24 @@
 package com.software.API.servicio;
 
 import com.software.API.modelo.Medicamento;
+import com.software.API.modelo.ObraSocial;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
+
 public interface ServicioAPISalud {
 
-    /**
-     * Verifica si una obra social existe en el sistema.
-     *
-     * @param id Identificador único de la obra social.
-     * @return `true` si la obra social existe, `false` en caso contrario.
-     */
-    boolean verificarObraSocial(Long id);
+    List<Medicamento> obtenerTodosLosMedicamentos(int pagina, int limite);
 
-    /**
-     * Verifica si un número de afiliado está asociado a una obra social específica.
-     *
-     * @param id Identificador único de la obra social.
-     * @param nroAfiliado Número de afiliado a verificar.
-     * @return `true` si el número de afiliado es válido para la obra social, `false` en caso contrario.
-     */
-    boolean verificarNumeroAfiliado(Long id, String nroAfiliado);
+    Medicamento obtenerMedicamento(int codigo);
 
-    /**
-     * Obtiene una lista de medicamentos disponibles desde la API externa y los agrega a la lista proporcionada.
-     *
-     * @param medicamentoList Lista donde se agregarán los medicamentos obtenidos de la API.
-     * @return `true` si se obtuvieron medicamentos exitosamente, `false` en caso contrario.
-     */
-    boolean obtenerMedicamentos(List<Medicamento> medicamentoList);
+    List<Medicamento> obtenerMedicamentosPorDescripcion(String descripcion);
+
+    List<ObraSocial> obtenerTodasLasObrasSociales();
+
+    ObraSocial obtenerObraSocialPorCodigo(String codigo);
 }

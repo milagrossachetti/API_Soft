@@ -23,14 +23,14 @@ public class Paciente {
     private String pais;
     private String nroAfiliado;
     private Estado estado;
-    private Long obraSocialId;
+    private ObraSocial obraSocial;
     private HistoriaClinica historiaClinica; // Se gestiona manualmente, no por JPA.
 
     public Paciente() {}
 
     public Paciente(Long cuil, Long dni, String nombreCompleto, Date fechaNacimiento, String numeroTelefono,
                     String email, String direccion, String localidad, String provincia, String pais,
-                    String nroAfiliado, Long obraSocialId) {
+                    String nroAfiliado, ObraSocial obraSocial) {
         if (cuil == null || nombreCompleto == null || fechaNacimiento == null) {
             throw new IllegalArgumentException("CUIL, nombre completo y fecha de nacimiento son obligatorios.");
         }
@@ -45,7 +45,7 @@ public class Paciente {
         this.provincia = provincia;
         this.pais = pais;
         this.nroAfiliado = nroAfiliado;
-        this.obraSocialId = obraSocialId;
+        this.obraSocial = obraSocial;
         this.estado = Estado.ACTIVO;
     }
 
@@ -58,6 +58,20 @@ public class Paciente {
             throw new HistoriaClinicaNoEncontradaException("El paciente no tiene una historia clínica asociada.");
         }
         return this.historiaClinica;
+    }
+
+    public String obtenerCodigoObraSocial() {
+        if (this.obraSocial == null || this.obraSocial.getCodigo() == null) {
+            throw new IllegalArgumentException("El paciente no tiene una obra social registrada o el código es nulo.");
+        }
+        return this.obraSocial.getCodigo();
+    }
+
+    public String obtenerNombreObraSocial() {
+        if (this.obraSocial == null || this.obraSocial.getDenominacion() == null){
+            throw new IllegalArgumentException("El paciente no tiene una obra social registrada o el nombre es nulo.");
+        }
+        return this.obraSocial.getDenominacion();
     }
 
     public void agregarDiagnostico(Diagnostico diagnostico) {

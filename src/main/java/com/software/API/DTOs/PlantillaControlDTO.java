@@ -1,7 +1,5 @@
 package com.software.API.DTOs;
 
-
-
 import lombok.Getter;
 import lombok.Setter;
 

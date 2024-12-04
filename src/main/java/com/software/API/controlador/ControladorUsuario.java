@@ -36,8 +36,10 @@ import java.util.Map;
 public class ControladorUsuario {
     @Autowired
     ServicioUsuario servicioUsuario;
+
     @Autowired
     private final AuthenticationManager authenticationManager;
+
     @Autowired
     private SecurityContextRepository securityContextRepository;
 
@@ -52,12 +54,10 @@ public class ControladorUsuario {
         try {
             UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated(usuarioInicioSesionDTO.getEmail(), usuarioInicioSesionDTO.getContrasenia());
             Authentication authenticationRequest = authenticationManager.authenticate(token);
-
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(authenticationRequest);
             SecurityContextHolder.setContext(context);
             securityContextRepository.saveContext(context, request, response);
-
             return ResponseEntity.ok().body("Usuario autenticado");
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Credenciales incorrectas. Verifica tu email y contraseña.");
@@ -78,5 +78,4 @@ public class ControladorUsuario {
         Usuario buscarUsuario = servicioUsuario.buscarUsuario(cuil);
         return ResponseEntity.ok(buscarUsuario);
     }
-
 }

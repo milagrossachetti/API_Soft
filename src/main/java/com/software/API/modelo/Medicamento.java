@@ -12,5 +12,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class Medicamento {
-    private String nombre;
+    private int codigo;
+    private String descripcion;
+    private String formato;
 }
