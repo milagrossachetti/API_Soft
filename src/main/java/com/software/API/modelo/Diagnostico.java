@@ -36,6 +36,7 @@ public class Diagnostico {
         this.nombreDiagnostico = nombreDiagnostico;
         this.nombreMedico = nombreMedico;
         this.especialidadMedico = especialidadMedico;
+        this.id = System.currentTimeMillis();
     }
 
 

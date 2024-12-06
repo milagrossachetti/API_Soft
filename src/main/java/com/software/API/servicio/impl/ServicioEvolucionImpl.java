@@ -194,39 +194,14 @@ public class ServicioEvolucionImpl implements ServicioEvolucion {
         }
     }
 
-    private PlantillaControl convertirPlantillaControlDTO(PlantillaControlDTO dto) {
+    public PlantillaControl convertirPlantillaControlDTO(PlantillaControlDTO dto) {
         if (dto == null) return null;
         return new PlantillaControl(dto.getPeso(), dto.getAltura(), dto.getPresion(), dto.getPulso(), dto.getSaturacion(), dto.getNivelAzucar());
     }
 
-    private PlantillaLaboratorio convertirPlantillaLaboratorioDTO(PlantillaLaboratorioDTO dto) {
+    public PlantillaLaboratorio convertirPlantillaLaboratorioDTO(PlantillaLaboratorioDTO dto) {
         if (dto == null) return null;
         return new PlantillaLaboratorio(dto.getTiposEstudios(), dto.getItems());
-    }
-
-    public void validarObraSocial(String codigoObraSocial) {
-        try {
-            ObraSocial obraSocial = servicioAPISalud.obtenerObraSocialPorCodigo(codigoObraSocial);
-            if (obraSocial == null) {
-                throw new IllegalArgumentException("La obra social no existe.");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error al validar la obra social: " + e.getMessage(), e);
-        }
-    }
-
-    public void validarMedicamentoPorNombre(String nombreMedicamento) {
-        try {
-            // Llamar al método para obtener medicamentos por descripción
-            List<Medicamento> medicamentos = servicioAPISalud.obtenerMedicamentosPorDescripcion(nombreMedicamento);
-
-            // Verificar si la lista de medicamentos está vacía o no
-            if (medicamentos.isEmpty()) {
-                throw new IllegalArgumentException("El medicamento con el nombre '" + nombreMedicamento + "' no existe.");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error al validar el medicamento por nombre: " + e.getMessage(), e);
-        }
     }
 
     @Override

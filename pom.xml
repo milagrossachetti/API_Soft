@@ -126,13 +126,11 @@
 			<version>3.1.0</version>
 		</dependency>
 
-		<!-- Núcleo de iText para generar PDFs -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>kernel</artifactId>
-			<version>9.0.0</version>
+			<version>7.1.14</version>
 		</dependency>
-		<!-- Layout para agregar elementos como párrafos, tablas, etc. al PDF -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>layout</artifactId>
@@ -160,7 +158,22 @@
 			<groupId>jakarta.validation</groupId>
 			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-java</artifactId>
+			<version>7.17.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna</artifactId>
+			<version>5.13.0</version> <!-- Usar esta versión si la más reciente no es accesible -->
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna-platform</artifactId>
+			<version>5.13.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -179,6 +192,16 @@
 				</configuration>
 			</plugin>
 
+			<!-- Plugin de Maven Compiler -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version> <!-- Puedes usar la última versión disponible -->
+				<configuration>
+					<source>17</source> <!-- Versión de Java utilizada para el código fuente -->
+					<target>17</target> <!-- Versión de bytecode generado -->
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

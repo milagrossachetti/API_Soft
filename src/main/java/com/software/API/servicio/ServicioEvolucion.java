@@ -1,9 +1,9 @@
 package com.software.API.servicio;
 
 import com.software.API.DTOs.EvolucionDTO;
-import com.software.API.modelo.Evolucion;
-import com.software.API.modelo.Paciente;
-import com.software.API.modelo.Receta;
+import com.software.API.DTOs.PlantillaControlDTO;
+import com.software.API.DTOs.PlantillaLaboratorioDTO;
+import com.software.API.modelo.*;
 import jakarta.mail.MessagingException;
 
 import java.util.List;
@@ -82,4 +82,9 @@ public interface ServicioEvolucion {
      * @throws MessagingException Si ocurre un error al enviar el correo.
      */
     void enviarEmailConAdjunto(String destinatario, String asunto, String cuerpo, byte[] adjunto, String nombreAdjunto) throws MessagingException;
+
+    PlantillaControl convertirPlantillaControlDTO(PlantillaControlDTO dto);
+
+    PlantillaLaboratorio convertirPlantillaLaboratorioDTO(PlantillaLaboratorioDTO dto);
 }
+

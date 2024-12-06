@@ -92,7 +92,7 @@ public class RepositorioPacienteMemoria implements RepositorioPaciente {
                 "Brenda Marinelli",
                 new Date(93, 4, 15),
                 "3816404000",
-                "marinellibrendaluciana@gmail.com",
+                "cisterna2728@gmail.com",
                 "Esteban Echeverria 2200",
                 "San Miguel de Tucuman",
                 "Tucuman",
