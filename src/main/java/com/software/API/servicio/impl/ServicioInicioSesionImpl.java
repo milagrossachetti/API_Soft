@@ -6,13 +6,13 @@ import com.software.API.servicio.ServicioInicioSesion;
 public class ServicioInicioSesionImpl implements ServicioInicioSesion {
 
     @Override
-    public String inicioSesion(Usuario usuario){
+    public String inicioSesion(Usuario usuario, Usuario usuarioInicioSesion){
 
-        if ("usuario@dominio.com".equals(usuario.getEmail()) &&
-                "123456".equals(usuario.getContrasenia())){
+        if (usuario.getEmail().equals(usuarioInicioSesion.getEmail()) &&
+                usuario.getContrasenia().equals(usuarioInicioSesion.getContrasenia())){
             return "Inicio de sesión exitoso.";
 
-        } else if (!"usuario@dominio.com".equals(usuario.getEmail())) {
+        } else if (!usuario.getEmail().equals(usuarioInicioSesion.getEmail())) {
             return "Usuario incorrecto.";
 
         } else {

@@ -12,6 +12,7 @@ public class InicioSesionStepdefs {
 
     private final ServicioInicioSesion servicioInicioSesion;
     private String resultado;
+    private Usuario usuario;
 
     public InicioSesionStepdefs() {
         servicioInicioSesion = new ServicioInicioSesionImpl();
@@ -19,7 +20,7 @@ public class InicioSesionStepdefs {
 
     @Given("el usuario tiene un correo {string} y una contrasenia {string}")
     public void elUsuarioTieneUnCorreoYUnaContrasenia(String email, String contrasenia) {
-        Usuario usuario = new Usuario();
+        usuario = new Usuario();
         usuario.setEmail(email);
         usuario.setContrasenia(contrasenia);
     }
@@ -29,7 +30,8 @@ public class InicioSesionStepdefs {
         Usuario usuarioInicioSesion = new Usuario();
         usuarioInicioSesion.setEmail(email);
         usuarioInicioSesion.setContrasenia(contrasenia);
-        resultado = servicioInicioSesion.inicioSesion(usuarioInicioSesion);
+
+        resultado = servicioInicioSesion.inicioSesion(usuario, usuarioInicioSesion);
     }
 
     @Then("el sistema debe permitir el acceso")
