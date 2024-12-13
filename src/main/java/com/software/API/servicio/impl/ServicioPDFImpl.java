@@ -73,12 +73,12 @@ public class ServicioPDFImpl implements ServicioPDF {
         document.add(new Paragraph("N° Afiliado: " + nroAfiliado));
         document.add(new Paragraph("\nEstudios Solicitados:").setFontSize(12).setMarginTop(10).setBold());
         for (String estudio : tiposEstudios) {
-            document.add(new Paragraph(estudio).setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph(estudio).setMarginLeft(40));
         }
 
         document.add(new Paragraph("\nItems:").setFontSize(12).setMarginTop(10).setBold());
         for (String item : items) {
-            document.add(new Paragraph(item).setTextAlignment(TextAlignment.CENTER));
+            document.add(new Paragraph(item).setMarginLeft(40));
         }
 
         document.add(new Paragraph("\nFirmado electrónicamente por:").setBold());
